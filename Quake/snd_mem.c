@@ -22,6 +22,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+static int GetSample(byte *data, int width, int idx) {
+    if (width == 2)
+        return LittleShort ( ((short *)data)[idx] );
+    else
+        return (int)( (unsigned char)(data[idx]) - 128) << 8;
+}
+
+static void SetSample(byte *data, int width, int idx, int sample) {
+    if (width == 2)
+        ((short *)data)[idx] = sample;
+    else
+        ((signed char *)data)[idx] = sample >> 8;
+}
+
 /*
 ================
 ResampleSfx
@@ -36,6 +50,9 @@ static void ResampleSfx (sfx_t *sfx, int inrate, int inwidth, byte *data)
 	int		sample, samplefrac, fracstep;
 	sfxcache_t	*sc;
 
+    int incount, sample_l, sample_r, delta;
+    long long dst_scaled, src_scaled;
+
 	sc = (sfxcache_t *) Cache_Check (&sfx->cache);
 	if (!sc)
 		return;
@@ -43,6 +60,7 @@ static void ResampleSfx (sfx_t *sfx, int inrate, int inwidth, byte *data)
 	stepscale = (float)inrate / shm->speed;	// this is usually 0.5, 1, or 2
 
 	outcount = sc->length / stepscale;
+    incount = sc->length;
 	sc->length = outcount;
 	if (sc->loopstart != -1)
 		sc->loopstart = sc->loopstart / stepscale;
@@ -62,6 +80,30 @@ static void ResampleSfx (sfx_t *sfx, int inrate, int inwidth, byte *data)
 		for (i = 0; i < outcount; i++)
 			((signed char *)sc->data)[i] = (int)( (unsigned char)(data[i]) - 128);
 	}
+    else if (stepscale < 1) {
+// upsampling
+        dst_scaled = 0;
+        i = 0;
+
+        for (srcsample = 0, src_scaled = 0; srcsample < incount; srcsample++, src_scaled+= shm->speed) {
+            sample_l = GetSample(data, inwidth, srcsample);
+
+            if (srcsample < incount - 1) {
+                sample_r = GetSample(data, inwidth, srcsample + 1);
+            } else {
+                sample_r = 0;
+            }
+
+            delta = sample_r - sample_l;
+
+            while (dst_scaled < src_scaled + shm->speed) {
+                sample = (dst_scaled - src_scaled) * delta / shm->speed + sample_l;
+                SetSample(sc->data, sc->width, i, sample);
+                i++;
+                dst_scaled+= inrate;
+            }
+        }
+    }
 	else
 	{
 // general case
@@ -71,14 +113,8 @@ static void ResampleSfx (sfx_t *sfx, int inrate, int inwidth, byte *data)
 		{
 			srcsample = samplefrac >> 8;
 			samplefrac += fracstep;
-			if (inwidth == 2)
-				sample = LittleShort ( ((short *)data)[srcsample] );
-			else
-				sample = (int)( (unsigned char)(data[srcsample]) - 128) << 8;
-			if (sc->width == 2)
-				((short *)sc->data)[i] = sample;
-			else
-				((signed char *)sc->data)[i] = sample >> 8;
+            sample = GetSample(data, inwidth, srcsample);
+            SetSample(sc->data, sc->width, i, sample);
 		}
 	}
 }
