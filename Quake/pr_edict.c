@@ -249,7 +249,6 @@ void ED_Free (edict_t *ed)
 	ed->v.solid = 0;
 	ed->alpha = ENTALPHA_DEFAULT; //johnfitz -- reset alpha for next entity
 	ed->scale = ENTSCALE_DEFAULT;
-	VectorCopy (vec3_origin, ed->scrollv);
 
 	ed->freetime = qcvm->time;
 }
@@ -1724,7 +1723,6 @@ static void PR_MergeEngineFieldDefs (void)
 		//future note: mutators will need to edit the mutator's globaldefs table too. remember to handle vectors and their 3 globals too.
 		{"alpha",			ev_float},	//just because we can (though its already handled in a weird hacky way)
 		{"scale",			ev_float},	//hurrah for being able to rescale entities.
-		{"scrollv",			ev_vector},	//hurrah for being able to rescale entities.
 		{"emiteffectnum",	ev_float},	//constantly emitting particles, even without moving.
 		{"traileffectnum",	ev_float},	//custom effect for trails
 		//{"glow_size",		ev_float},	//deprecated particle trail rubbish
