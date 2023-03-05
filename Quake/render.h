@@ -73,6 +73,7 @@ typedef struct entity_s
 
 	byte					alpha;			//johnfitz -- alpha
 	byte					scale;
+    vec3_t                  scrollv;
 	byte					lerpflags;		//johnfitz -- lerping
 	float					lerpstart;		//johnfitz -- animation lerping
 	float					lerptime;		//johnfitz -- animation lerping

@@ -398,6 +398,7 @@ DRAW_ELEMENTS_INDIRECT_COMMAND \
 "struct Instance\n"\
 "{\n"\
 "	vec4	mat[3];\n"\
+"   vec2    scroll;\n"\
 "	float	alpha;\n"\
 "};\n"\
 "\n"\
@@ -502,8 +503,9 @@ WORLD_VERTEX_BUFFER
 "layout(location=6) noperspective out vec2 out_coord;\n"
 "layout(location=7) flat out vec4 out_styles;\n"
 "layout(location=8) flat out float out_lmofs;\n"
+"layout(location=9) flat out vec2 out_scroll;\n"
 "#if BINDLESS\n"
-"	layout(location=9) flat out uvec4 out_samplers;\n"
+"	layout(location=10) flat out uvec4 out_samplers;\n"
 "#endif\n"
 "\n"
 "void main()\n"
@@ -511,6 +513,7 @@ WORLD_VERTEX_BUFFER
 "	Call call = call_data[DRAW_ID];\n"
 "	int instance_id = GET_INSTANCE_ID(call);\n"
 "	Instance instance = instance_data[instance_id];\n"
+"   out_scroll = instance.scroll;\n"
 "	out_pos = Transform(in_pos, instance);\n"
 "	gl_Position = ViewProj * vec4(out_pos, 1.0);\n"
 "#if REVERSED_Z\n"
@@ -585,8 +588,9 @@ NOISE_FUNCTIONS
 "layout(location=6) noperspective in vec2 in_coord;\n"
 "layout(location=7) flat in vec4 in_styles;\n"
 "layout(location=8) flat in float in_lmofs;\n"
+"layout(location=9) flat in vec2 in_scroll;\n"
 "#if BINDLESS\n"
-"	layout(location=9) flat in uvec4 in_samplers;\n"
+"	layout(location=10) flat in uvec4 in_samplers;\n"
 "#endif\n"
 "\n"
 OIT_OUTPUT (out_fragcolor)
@@ -605,12 +609,14 @@ OIT_OUTPUT (out_fragcolor)
 "#if BINDLESS\n"
 "	sampler2D Tex = sampler2D(in_samplers.xy);\n"
 "	sampler2D FullbrightTex;\n"
+"   uv+= in_scroll / vec2(textureSize(Tex, 0));\n"
 "	if ((in_flags & CF_USE_FULLBRIGHT) != 0u)\n"
 "	{\n"
 "		FullbrightTex = sampler2D(in_samplers.zw);\n"
 "		fullbright = texture(FullbrightTex, uv).rgb;\n"
 "	}\n"
 "#else\n"
+"   uv+= in_scroll / vec2(textureSize(Tex, 0));\n"
 "	if ((in_flags & CF_USE_FULLBRIGHT) != 0u)\n"
 "		fullbright = texture(FullbrightTex, uv).rgb;\n"
 "#endif\n"

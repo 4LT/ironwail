@@ -59,6 +59,7 @@ typedef struct edict_s
 	unsigned char	scale;			/* Quakespasm: added for model scale support. */
 	qboolean	forcewater;			/* mod overrides waterlevel */
 	qboolean	sendforcewater;		/* waterlevel override has changed and needs to be sent over to the client */
+    vec3_t          scrollv;
 	qboolean	sendinterval;		/* johnfitz -- send time until nextthink to client for better lerp timing */
 	float		oldframe;
 	float		oldthinktime;
@@ -141,6 +142,7 @@ struct pr_extfields_s
 	/*renderscene means we need a number of fields here*/	\
 	QCEXTFIELD(alpha,					".float")				/*float*/	\
 	QCEXTFIELD(scale,					".float")				/*float*/	\
+	QCEXTFIELD(scrollv,					".vector")				/*float*/	\
 	QCEXTFIELD(colormod,				".vector")			/*vector*/	\
 	/*end of list*/
 #define QCEXTFIELDS_GAME	\
