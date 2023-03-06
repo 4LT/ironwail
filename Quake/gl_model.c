@@ -2433,6 +2433,10 @@ visdone:
 			mod = loadmodel;
 		}
 	}
+
+	// bmodel props
+	mod->scrollv[0] = 0.f;
+	mod->scrollv[1] = 0.f;
 }
 
 /*

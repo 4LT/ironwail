@@ -353,10 +353,6 @@ static void CL_InitBrushModelProps(int model_ct) {
 	for (i = 1; i < model_ct; i++) {
 		cl_model = cl.model_precache[i];
 
-		// always initialize scrollv to play it safe
-		cl_model->scrollv[0] = 0.f;
-		cl_model->scrollv[1] = 0.f;
-
 		if (cl_model->name[0] == '*') {
 			bmodel = atoi(cl_model->name + 1);
 
