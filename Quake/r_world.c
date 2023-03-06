@@ -208,8 +208,8 @@ static void R_InitBModelInstance (bmodel_gpu_instance_t *inst, entity_t *ent)
 	MatrixTranspose4x3 (mat, inst->world);
 
 	inst->alpha = ent->alpha == ENTALPHA_DEFAULT ? -1.f : ENTALPHA_DECODE (ent->alpha);
-	inst->scroll[0] = -ent->model->scrollv[0] * (float)cl.time;
-	inst->scroll[1] = ent->model->scrollv[1] * (float)cl.time;
+	inst->scroll[0] = ent->model->scrollv[0] * (float)cl.time;
+	inst->scroll[1] = -ent->model->scrollv[1] * (float)cl.time;
 	memset (&inst->padding, 0, sizeof(inst->padding));
 }
 
