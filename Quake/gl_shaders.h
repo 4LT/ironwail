@@ -398,7 +398,7 @@ DRAW_ELEMENTS_INDIRECT_COMMAND \
 "struct Instance\n"\
 "{\n"\
 "	vec4	mat[3];\n"\
-"   vec2    scroll;\n"\
+"	vec2    scroll;\n"\
 "	float	alpha;\n"\
 "};\n"\
 "\n"\
@@ -513,7 +513,7 @@ WORLD_VERTEX_BUFFER
 "	Call call = call_data[DRAW_ID];\n"
 "	int instance_id = GET_INSTANCE_ID(call);\n"
 "	Instance instance = instance_data[instance_id];\n"
-"   out_scroll = instance.scroll;\n"
+"	out_scroll = instance.scroll;\n"
 "	out_pos = Transform(in_pos, instance);\n"
 "	gl_Position = ViewProj * vec4(out_pos, 1.0);\n"
 "#if REVERSED_Z\n"
@@ -609,14 +609,14 @@ OIT_OUTPUT (out_fragcolor)
 "#if BINDLESS\n"
 "	sampler2D Tex = sampler2D(in_samplers.xy);\n"
 "	sampler2D FullbrightTex;\n"
-"   uv+= in_scroll / vec2(textureSize(Tex, 0));\n"
+"	uv+= in_scroll / vec2(textureSize(Tex, 0));\n"
 "	if ((in_flags & CF_USE_FULLBRIGHT) != 0u)\n"
 "	{\n"
 "		FullbrightTex = sampler2D(in_samplers.zw);\n"
 "		fullbright = texture(FullbrightTex, uv).rgb;\n"
 "	}\n"
 "#else\n"
-"   uv+= in_scroll / vec2(textureSize(Tex, 0));\n"
+"	uv+= in_scroll / vec2(textureSize(Tex, 0));\n"
 "	if ((in_flags & CF_USE_FULLBRIGHT) != 0u)\n"
 "		fullbright = texture(FullbrightTex, uv).rgb;\n"
 "#endif\n"
