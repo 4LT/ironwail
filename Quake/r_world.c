@@ -152,9 +152,9 @@ float GL_WaterAlphaForEntityTextureType (entity_t *ent, textype_t type)
 
 typedef struct bmodel_gpu_instance_s {
 	float		world[12];	// world matrix (transposed mat4x3)
-    float       scroll[2];
+	float       scroll[2];
 	float		alpha;
-    float       padding[1];
+	float       padding[1];
 } bmodel_gpu_instance_t;
 
 typedef struct bmodel_bindless_gpu_call_s {
@@ -208,9 +208,9 @@ static void R_InitBModelInstance (bmodel_gpu_instance_t *inst, entity_t *ent)
 	MatrixTranspose4x3 (mat, inst->world);
 
 	inst->alpha = ent->alpha == ENTALPHA_DEFAULT ? -1.f : ENTALPHA_DECODE (ent->alpha);
-    inst->scroll[0] = ent->model->scrollv[0] * (float)realtime;
-    inst->scroll[1] = ent->model->scrollv[1] * (float)realtime;
-    memset (&inst->padding, 0, sizeof(inst->padding));
+	inst->scroll[0] = ent->model->scrollv[0] * (float)realtime;
+	inst->scroll[1] = ent->model->scrollv[1] * (float)realtime;
+	memset (&inst->padding, 0, sizeof(inst->padding));
 }
 
 /*
