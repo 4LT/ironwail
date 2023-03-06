@@ -276,6 +276,94 @@ void CL_KeepaliveMessage (void)
 	SZ_Clear (&cls.message);
 }
 
+typedef struct {
+    float   scrollv[2];
+} bmodel_props_t;
+
+/*
+======================
+CL_InitBrushModelProps
+======================
+
+Initialize brush model properties from map entities
+
+*/
+static void CL_InitBrushModelProps(int model_ct) {
+    int i, bmodel;
+    qboolean skip_parse = false;
+    const char *ent_data, *scrollv_tok;
+    char key[128];
+    float scrollv[2];
+    bmodel_props_t *bmodel_props, *bmodel_prop_set;
+    qmodel_t *cl_model;
+
+    // alloc enough space for all models (brush models included)
+    bmodel_props = malloc(model_ct * sizeof(*bmodel_props));
+
+    for (i = 0; i < model_ct; i++) {
+        bmodel_props[i].scrollv[0] = 0.f;
+        bmodel_props[i].scrollv[1] = 0.f;
+    }
+
+    // parse models and properties
+    ent_data = COM_Parse(cl.worldmodel->entities);
+    while (ent_data && !skip_parse) {
+        bmodel = 0;
+        scrollv[0] = 0.f;
+        scrollv[1] = 0.f;
+
+        if (strcmp(com_token, "{")) {
+            break;
+        }
+
+        ent_data = COM_Parse(ent_data);
+        while (ent_data && strcmp(com_token, "}")) {
+		    q_strlcpy(key, com_token, sizeof(key));
+            ent_data = COM_Parse(ent_data);
+
+            if (ent_data) {
+                if (!strcmp(key, "model")) {
+                    if (com_token[0] == '*') {
+                        bmodel = atoi(com_token + 1);
+                    }
+                } else if (!strcmp(key, "scrollv")) {
+                    scrollv_tok = strtok(com_token, " ");
+                    scrollv[0] = scrollv_tok ? atof(scrollv_tok) : 0.f;
+                    scrollv_tok = strtok(NULL, " ");
+                    scrollv[1] = scrollv_tok ? atof(scrollv_tok) : 0.f;
+                }
+
+                ent_data = COM_Parse(ent_data);
+            } else {
+                skip_parse = true;
+            }
+        }
+
+        if (!skip_parse && bmodel < model_ct && bmodel > 0) {
+            bmodel_prop_set = bmodel_props + bmodel;
+            memcpy(bmodel_prop_set->scrollv, scrollv, sizeof(scrollv));
+        }
+
+        ent_data = COM_Parse(ent_data);
+    }
+
+    // copy properties from temp. buffer to cache
+    for (i = 1; i < model_ct; i++) {
+        cl_model = cl.model_precache[i];
+
+        if (cl_model->name[0] == '*') {
+            bmodel = atoi(cl_model->name + 1);
+
+            if (bmodel < model_ct && bmodel > 0) {
+                bmodel_prop_set = bmodel_props + bmodel;
+                memcpy(cl_model->scrollv, bmodel_prop_set->scrollv, sizeof(scrollv));
+            }
+        }
+    }
+
+    free(bmodel_props);
+}
+
 /*
 ==================
 CL_ParseServerInfo
@@ -421,6 +509,9 @@ void CL_ParseServerInfo (void)
 // local state
 	cl_entities[0].model = cl.worldmodel = cl.model_precache[1];
 
+// Set brush model properties
+    CL_InitBrushModelProps(nummodels);
+
 	R_NewMap ();
 
 	//johnfitz -- clear out string; we don't consider identical
@@ -439,6 +530,8 @@ void CL_ParseServerInfo (void)
 	memset(&dev_peakstats, 0, sizeof(dev_peakstats));
 	memset(&dev_overflows, 0, sizeof(dev_overflows));
 }
+
+
 
 /*
 ==================

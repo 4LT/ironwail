@@ -494,6 +494,8 @@ typedef struct qmodel_s
 	int			contentstransparent;	//spike -- added this so we can disable glitchy wateralpha where its not supported.
 	qboolean	haslitwater;
 
+    float       scrollv[2];
+
 //
 // alias model
 //
