@@ -806,7 +806,7 @@ OIT_OUTPUT (out_fragcolor)
 "	sampler2D Tex = sampler2D(in_sampler);\n"
 "#endif\n"
 "	uv+= in_scroll / vec2(textureSize(Tex, 0));\n"
-"	uv = uv * 2.0 + 0.125 * sin(in_uv.yx * (3.14159265 * 2.0) + Time);\n"
+"	uv = uv * 2.0 + 0.125 * sin(uv.yx * (3.14159265 * 2.0) + Time);\n"
 "	vec4 result = texture(Tex, uv);\n"
 "	result.rgb = ApplyFog(result.rgb, in_pos);\n"
 "	result.a *= in_alpha;\n"
