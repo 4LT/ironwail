@@ -386,9 +386,9 @@ typedef struct
 	bonepose_t inverse;
 } boneinfo_t;
 
-#define	MAXALIASVERTS	2000 //johnfitz -- was 1024
+#define	MAXALIASVERTS	4096 //IW -- was 1024
 #define	MAXALIASFRAMES	1024 //spike -- was 256
-#define	MAXALIASTRIS	4096 //ericw -- was 2048
+#define	MAXALIASTRIS	8192 //IW -- was 2048
 extern	aliashdr_t	*pheader;
 extern	stvert_t	stverts[MAXALIASVERTS];
 extern	mtriangle_t	triangles[MAXALIASTRIS];
