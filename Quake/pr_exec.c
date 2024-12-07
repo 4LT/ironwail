@@ -392,6 +392,7 @@ The interpretation main loop
 #define OPB ((eval_t *)&qcvm->globals[(unsigned short)st->b])
 #define OPC ((eval_t *)&qcvm->globals[(unsigned short)st->c])
 
+int last_profile;
 void PR_ExecuteProgram (func_t fnum)
 {
 	eval_t		*ptr;
@@ -418,8 +419,8 @@ void PR_ExecuteProgram (func_t fnum)
 	st = &qcvm->statements[PR_EnterFunction(f)];
 	startprofile = profile = 0;
 
-    while (1)
-    {
+	while (1)
+	{
 	st++;	/* next statement */
 
 	if (++profile > 0x1000000) /* was 100000 */
@@ -456,8 +457,8 @@ void PR_ExecuteProgram (func_t fnum)
 		break;
 	case OP_MUL_V:
 		OPC->_float = OPA->vector[0] * OPB->vector[0] +
-			      OPA->vector[1] * OPB->vector[1] +
-			      OPA->vector[2] * OPB->vector[2];
+				  OPA->vector[1] * OPB->vector[1] +
+				  OPA->vector[2] * OPB->vector[2];
 		break;
 	case OP_MUL_FV:
 		OPC->vector[0] = OPA->_float * OPB->vector[0];
@@ -522,8 +523,8 @@ void PR_ExecuteProgram (func_t fnum)
 		break;
 	case OP_EQ_V:
 		OPC->_float = (OPA->vector[0] == OPB->vector[0]) &&
-			      (OPA->vector[1] == OPB->vector[1]) &&
-			      (OPA->vector[2] == OPB->vector[2]);
+				  (OPA->vector[1] == OPB->vector[1]) &&
+				  (OPA->vector[2] == OPB->vector[2]);
 		break;
 	case OP_EQ_S:
 		OPC->_float = !strcmp(PR_GetString(OPA->string), PR_GetString(OPB->string));
@@ -540,8 +541,8 @@ void PR_ExecuteProgram (func_t fnum)
 		break;
 	case OP_NE_V:
 		OPC->_float = (OPA->vector[0] != OPB->vector[0]) ||
-			      (OPA->vector[1] != OPB->vector[1]) ||
-			      (OPA->vector[2] != OPB->vector[2]);
+				  (OPA->vector[1] != OPB->vector[1]) ||
+				  (OPA->vector[2] != OPB->vector[2]);
 		break;
 	case OP_NE_S:
 		OPC->_float = strcmp(PR_GetString(OPA->string), PR_GetString(OPB->string));
@@ -663,7 +664,7 @@ void PR_ExecuteProgram (func_t fnum)
 	case OP_DONE:
 	case OP_RETURN:
 		qcvm->xfunction->profile += profile - startprofile;
-		startprofile = profile;
+		last_profile = startprofile = profile;
 		qcvm->xstatement = st - qcvm->statements;
 		qcvm->globals[OFS_RETURN] = qcvm->globals[(unsigned short)st->a];
 		qcvm->globals[OFS_RETURN + 1] = qcvm->globals[(unsigned short)st->a + 1];
@@ -686,7 +687,7 @@ void PR_ExecuteProgram (func_t fnum)
 		qcvm->xstatement = st - qcvm->statements;
 		PR_RunError("Bad opcode %i", st->op);
 	}
-    }	/* end of while(1) loop */
+	}	/* end of while(1) loop */
 }
 
 #undef OPA

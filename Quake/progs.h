@@ -387,6 +387,7 @@ typedef struct builtindef_s
 
 extern builtindef_t	pr_builtindefs[];
 extern int			pr_numbuiltindefs;
+extern int			last_profile;
 
 FUNC_NORETURN void PR_RunError (const char *error, ...) FUNC_PRINTF(1,2);
 #ifdef __WATCOMC__
@@ -395,6 +396,8 @@ FUNC_NORETURN void PR_RunError (const char *error, ...) FUNC_PRINTF(1,2);
 
 void ED_PrintEdicts (void);
 void ED_PrintNum (int ent);
+ddef_t *ED_FindGlobal (const char *name);
+ddef_t *ED_FindField (const char *name);
 
 eval_t *GetEdictFieldValue(edict_t *ed, int fldofs);
 eval_t *GetEdictFieldValueByName(edict_t *ed, const char *name);
