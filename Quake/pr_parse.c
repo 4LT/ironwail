@@ -24,6 +24,7 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 	ddef_t *glob, *fielddef;
 	edict_t *ed;
 	float x, y, z;
+	int ofs;
 
 	result.success = false;
 
@@ -82,7 +83,23 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 		result.success = true;
 		break;
 	case '#':
-		result.payload.reason = "Integer literals unimplemented";
+	case '!':
+		if (!isnumber(arg + 1))
+		{
+			result.payload.reason = "Not a valid integer";
+			break;
+		}
+
+		ofs = atoi(arg + 1);
+
+		if (arg[0] == '!')
+		{
+			ofs = EDICT_TO_PROG(EDICT_NUM(ofs));
+		}
+
+		result.payload.arg.value.i = ofs;
+		result.payload.arg.kind = progsarg_int;
+		result.success = true;
 		break;
 	case '@':
 		result.payload.reason = "String literals unimplemented";
