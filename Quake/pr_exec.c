@@ -354,7 +354,7 @@ static int PR_LeaveFunction (void)
 PR_CheckBuiltinExtension
 ====================
 */
-static void PR_CheckBuiltinExtension (dfunction_t *func)
+void PR_CheckBuiltinExtension (dfunction_t *func)
 {
 	uint32_t builtin = -func->first_statement;
 	uint32_t extnum = qcvm->builtin_ext[builtin];

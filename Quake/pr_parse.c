@@ -102,7 +102,9 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 		result.success = true;
 		break;
 	case '@':
-		result.payload.reason = "String literals unimplemented";
+		result.payload.arg.value.s = arg + 1;
+		result.payload.arg.kind = progsarg_string;
+		result.success = true;
 		break;
 	case '$':
 		result.payload.reason = "User vars unimplemented";

@@ -2278,9 +2278,10 @@ static void PR_SubCmdPrint (const char *arg) {
 }
 
 static void PR_SubCmdCall (int argc, const char **argv, int profile) {
-	int ofs, in_ofs, fill_vector;
+	int ofs, in_ofs, fill_vector, builtin_idx;
 	float *vector;
 	func_t fnum;
+	dfunction_t *fn;
 	parseresult_t parse_result;
 	progsarg_t arg;
 	edict_t *ed;
@@ -2378,7 +2379,7 @@ static void PR_SubCmdCall (int argc, const char **argv, int profile) {
 			break;
 		case progsarg_string:
 			((string_t *)qcvm->globals)[OFS_PARM0 + 3*ofs] =
-				PR_SetEngineString(arg.value.s);
+				PR_MakeTempString(arg.value.s);
 			break;
 		case progsarg_float:
 		case progsarg_int:
@@ -2401,16 +2402,41 @@ static void PR_SubCmdCall (int argc, const char **argv, int profile) {
 
 	if (fnum != 0)
 	{
-		PR_ExecuteProgram(fnum);
+		fn = &qcvm->functions[fnum];
 
-		if (profile) {
-			Con_Printf("  -----\n");
-			Con_Printf("%d instructions\n", last_profile);
+		if (fn->first_statement < 0)
+		{
+			builtin_idx = -fn->first_statement;
+
+			if (builtin_idx >= qcvm->numbuiltins)
+			{
+				Con_Printf("Bad built-in %d.\n", builtin_idx);
+				return;
+			}
+
+			if (profile)
+			{
+				Con_Printf("Can't profile built-in.\n");
+				return;
+			}
+
+			PR_CheckBuiltinExtension (fn);
+			qcvm->argc = argc - 1;
+			qcvm->builtins[builtin_idx]();
+		}
+		else
+		{
+			PR_ExecuteProgram(fnum);
+
+			if (profile) {
+				Con_Printf("  -----\n");
+				Con_Printf("%d instructions\n", last_profile);
+			}
 		}
 	}
 	else
 	{
-		Con_Printf("Can't call function %s.\n", argv[0]);
+		Con_Printf("Null function %s.\n", argv[0]);
 	}
 }
 
