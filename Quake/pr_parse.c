@@ -1,3 +1,4 @@
+#include "quakedef.h"
 #include "pr_parse.h"
 
 static int isnumber(const char *s) {
