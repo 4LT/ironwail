@@ -24,7 +24,6 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 	ddef_t *glob, *fielddef;
 	edict_t *ed;
 	float x, y, z;
-	int ofs;
 
 	result.success = false;
 
@@ -90,15 +89,17 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 			break;
 		}
 
-		ofs = atoi(arg + 1);
+		result.payload.arg.value.i = atoi(arg + 1);
 
 		if (arg[0] == '!')
 		{
-			ofs = EDICT_TO_PROG(EDICT_NUM(ofs));
+			result.payload.arg.kind = progsarg_entity;
+		}
+		else
+		{
+			result.payload.arg.kind = progsarg_int;
 		}
 
-		result.payload.arg.value.i = ofs;
-		result.payload.arg.kind = progsarg_int;
 		result.success = true;
 		break;
 	case '@':
@@ -167,7 +168,7 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 		} while(tok);
 
 		result.payload.arg.value.efield.fld = fielddef;
-		result.payload.arg.value.efield.edict = NUM_FOR_EDICT(ed);
+		result.payload.arg.value.efield.edict = ed;
 		result.payload.arg.kind = progsarg_field;
 		result.success = true;
 cleanup:
