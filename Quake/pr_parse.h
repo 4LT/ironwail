@@ -1,7 +1,7 @@
 #ifndef PR_PARSE_H
 #define PR_PARSE_H
 
-#include "quakedef.h"
+#include "progs.h"
 
 typedef enum
 {
