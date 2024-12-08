@@ -13,13 +13,14 @@ typedef enum
 	// literals
 	progsarg_string,
 	progsarg_int,
+	progsarg_entity,
 	progsarg_float,
 	progsarg_vector
 } progsargkind_e;
 
 typedef struct efield_s {
+	edict_t *edict;
 	ddef_t *fld;
-	int edict;
 } efield_t;
 
 typedef struct progsarg_s

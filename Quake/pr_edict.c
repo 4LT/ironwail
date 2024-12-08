@@ -2305,7 +2305,7 @@ static void PR_SubCmdCall (int argc, const char **argv, int profile) {
 		arg.kind == progsarg_field &&
 		(arg.value.efield.fld->type & ~DEF_SAVEGLOBAL) == ev_function)
 	{
-		ed = EDICT_NUM(arg.value.efield.edict);
+		ed = arg.value.efield.edict;
 		fnum = E_INT(ed, arg.value.efield.fld->ofs);
 		((int *)qcvm->globals)[ED_FindGlobal("self")->ofs] = EDICT_TO_PROG(ed);
 	}
@@ -2355,7 +2355,7 @@ static void PR_SubCmdCall (int argc, const char **argv, int profile) {
 			break;
 		case progsarg_field:
 			in_ofs = arg.value.efield.fld->ofs;
-			ed = EDICT_NUM(arg.value.efield.edict);
+			ed = arg.value.efield.edict;
 
 			if (arg.value.efield.fld->type == ev_vector)
 			{
@@ -2380,6 +2380,10 @@ static void PR_SubCmdCall (int argc, const char **argv, int profile) {
 		case progsarg_string:
 			((string_t *)qcvm->globals)[OFS_PARM0 + 3*ofs] =
 				PR_MakeTempString(arg.value.s);
+			break;
+		case progsarg_entity:
+			((int *)qcvm->globals)[OFS_PARM0 + 3*ofs] =
+				EDICT_TO_PROG(EDICT_NUM(arg.value.i));
 			break;
 		case progsarg_float:
 		case progsarg_int:
