@@ -18,7 +18,10 @@ static int isnumber(const char *s) {
 parseresult_t PR_ParseCmdArg(const char *arg)
 {
 	parseresult_t result;
-	char *rest;
+	char *tokens, *rest;
+	const char *tok;
+	ddef_t *glob, *fielddef;
+	edict_t *ed;
 	float x, y, z;
 
 	result.success = false;
@@ -87,7 +90,68 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 		result.payload.reason = "User vars unimplemented";
 		break;
 	default:
-		result.payload.reason = "Globals/fields unimplemented";
+		tokens = strdup(arg);
+		tok = strtok(tokens, ".");
+
+		if (!tok)
+		{
+			result.payload.reason = "Bad token for global";
+			goto cleanup;
+		}
+
+		glob = ED_FindGlobal(tok);
+
+		if (!glob)
+		{
+			result.payload.reason = "Unrecognized global";
+			goto cleanup;
+		}
+
+		tok = strtok(NULL, ".");
+		
+		if (!tok)
+		{
+			result.payload.arg.value.g = glob;
+			result.payload.arg.kind = progsarg_global;
+			result.success = true;
+			goto cleanup;
+		}
+
+		ed = PROG_TO_EDICT(G_INT(glob->ofs));
+
+		do
+		{
+			fielddef = ED_FindField(tok);
+
+			if (!fielddef)
+			{
+				result.payload.reason = "Unrecognized field";
+				goto cleanup;
+			}
+
+			tok = strtok(NULL, ".");
+
+			if (tok)
+			{
+
+				if ((fielddef->type & ~DEF_SAVEGLOBAL) == ev_entity)
+				{
+					ed = PROG_TO_EDICT(E_INT(ed, fielddef->ofs));
+				}
+				else
+				{
+					result.payload.reason = "Can't access field of non-entity";
+					goto cleanup;
+				}
+			}
+		} while(tok);
+
+		result.payload.arg.value.efield.fld = fielddef;
+		result.payload.arg.value.efield.edict = NUM_FOR_EDICT(ed);
+		result.payload.arg.kind = progsarg_field;
+		result.success = true;
+cleanup:
+		free(tokens);
 	}
 	
 	return result;

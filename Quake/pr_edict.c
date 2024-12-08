@@ -2265,185 +2265,212 @@ static void ED_Nomonsters_f (cvar_t *cvar)
 
 
 static void PR_SubCmdPrint (const char *arg) {
-    parseresult_t parse_result = PR_ParseCmdArg(arg);
-    
-    if (parse_result.success)
-    {
-        PR_PrintArg(parse_result.payload.arg);
-    }
-    else
-    {
-        Con_Printf("Parse Argument: %s\n", parse_result.payload.reason);
-    }
+	parseresult_t parse_result = PR_ParseCmdArg(arg);
+	
+	if (parse_result.success)
+	{
+		PR_PrintArg(parse_result.payload.arg);
+	}
+	else
+	{
+		Con_Printf("Parse Argument: %s\n", parse_result.payload.reason);
+	}
 }
 
 static void PR_SubCmdCall (int argc, const char **argv, int profile) {
-    int ofs, in_ofs, fill_vector;
-    float *vector;
-    func_t fnum;
-    parseresult_t parse_result;
-    progsarg_t arg;
-    edict_t *ed;
+	int ofs, in_ofs, fill_vector;
+	float *vector;
+	func_t fnum;
+	parseresult_t parse_result;
+	progsarg_t arg;
+	edict_t *ed;
 
-    for (ofs = 0; ofs < argc - 1; ofs++)
-    {
-        parse_result = PR_ParseCmdArg(argv[ofs + 1]);
-        
-        if (!parse_result.success)
-        {
-            Con_Printf(
-                "Parse Argument %i: %s\n",
-                ofs + 1,
-                parse_result.payload.reason
-            );
-            return;
-        }
+	parse_result = PR_ParseCmdArg(argv[0]);
 
-        fill_vector = true;
-        arg = parse_result.payload.arg;
+	if (!parse_result.success) {
+		Con_Printf("Parse Argument 0: %s\n", parse_result.payload.reason);
+		return;
+	}
 
-        switch (arg.kind) {
-        case progsarg_uservar:
-            Con_Printf("User vars unimplemented.\n");
-            return;
-        case progsarg_global:
-            in_ofs = arg.value.g->ofs;
+	arg = parse_result.payload.arg;
+	
+	if (
+		arg.kind == progsarg_global &&
+		(arg.value.g->type & ~DEF_SAVEGLOBAL) == ev_function)
+	{
+		fnum = G_FUNCTION(arg.value.g->ofs);
+	}
+	else if (
+		arg.kind == progsarg_field &&
+		(arg.value.efield.fld->type & ~DEF_SAVEGLOBAL) == ev_function)
+	{
+		ed = EDICT_NUM(arg.value.efield.edict);
+		fnum = E_INT(ed, arg.value.efield.fld->ofs);
+		((int *)qcvm->globals)[ED_FindGlobal("self")->ofs] = EDICT_TO_PROG(ed);
+	}
+	else 
+	{
+		Con_Printf("Not a function\n");
+		return;
+	}
 
-            if (arg.value.g->type == ev_vector)
-            {
-                vector = G_VECTOR(arg.value.g->ofs);
-                qcvm->globals[OFS_PARM0 + 3*ofs] = vector[0];
-                qcvm->globals[OFS_PARM0 + 3*ofs + 1] = vector[1];
-                qcvm->globals[OFS_PARM0 + 3*ofs + 2] = vector[2];
-                fill_vector = false;
-            }
-            else
-            {
-                qcvm->globals[OFS_PARM0 + 3*ofs] = G_FLOAT(arg.value.g->ofs);
-            }
+	for (ofs = 0; ofs < argc - 1; ofs++)
+	{
+		parse_result = PR_ParseCmdArg(argv[ofs + 1]);
+		
+		if (!parse_result.success)
+		{
+			Con_Printf(
+				"Parse Argument %i: %s\n",
+				ofs + 1,
+				parse_result.payload.reason
+			);
+			return;
+		}
 
-            break;
-        case progsarg_field:
-            in_ofs = arg.value.efield.fld->ofs;
-            ed = EDICT_NUM(arg.value.efield.edict);
+		fill_vector = true;
+		arg = parse_result.payload.arg;
 
-            if (arg.value.efield.fld->type == ev_vector)
-            {
-                vector = E_VECTOR(ed, in_ofs);
-                qcvm->globals[OFS_PARM0 + 3*ofs] = vector[0];
-                qcvm->globals[OFS_PARM0 + 3*ofs + 1] = vector[1];
-                qcvm->globals[OFS_PARM0 + 3*ofs + 2] = vector[2];
-                fill_vector = false;
-            }
-            else
-            {
-                qcvm->globals[OFS_PARM0 + 3*ofs] = E_FLOAT(ed, in_ofs);
-            }
+		switch (arg.kind) {
+		case progsarg_uservar:
+			Con_Printf("User vars unimplemented.\n");
+			return;
+		case progsarg_global:
+			in_ofs = arg.value.g->ofs;
 
-            break;
-        case progsarg_vector:
-            qcvm->globals[OFS_PARM0 + 3*ofs] = arg.value.v[0];
-            qcvm->globals[OFS_PARM0 + 3*ofs + 1] = arg.value.v[1];
-            qcvm->globals[OFS_PARM0 + 3*ofs + 2] = arg.value.v[2];
-            fill_vector = false;
-            break;
-        case progsarg_string:
-            ((string_t *)qcvm->globals)[OFS_PARM0 + 3*ofs] =
-                PR_SetEngineString(arg.value.s);
-            break;
-        case progsarg_float:
-        case progsarg_int:
-            qcvm->globals[OFS_PARM0 + 3*ofs] = arg.value.f;
-        }
-        
-        if (fill_vector)
-        {
-            qcvm->globals[OFS_PARM0 + 3*ofs + 1] = 0.f;
-            qcvm->globals[OFS_PARM0 + 3*ofs + 2] = 0.f;
-        }
-    }
+			if (arg.value.g->type == ev_vector)
+			{
+				vector = G_VECTOR(arg.value.g->ofs);
+				qcvm->globals[OFS_PARM0 + 3*ofs] = vector[0];
+				qcvm->globals[OFS_PARM0 + 3*ofs + 1] = vector[1];
+				qcvm->globals[OFS_PARM0 + 3*ofs + 2] = vector[2];
+				fill_vector = false;
+			}
+			else
+			{
+				qcvm->globals[OFS_PARM0 + 3*ofs] = G_FLOAT(arg.value.g->ofs);
+			}
 
-    for (; ofs < 8; ofs++)
-    {
-        qcvm->globals[OFS_PARM0 + 3*ofs] = 0.f;
-        qcvm->globals[OFS_PARM0 + 3*ofs + 1] = 0.f;
-        qcvm->globals[OFS_PARM0 + 3*ofs + 2] = 0.f;
-    }
+			break;
+		case progsarg_field:
+			in_ofs = arg.value.efield.fld->ofs;
+			ed = EDICT_NUM(arg.value.efield.edict);
 
-    fnum = PR_FindExtFunction(argv[0]);
+			if (arg.value.efield.fld->type == ev_vector)
+			{
+				vector = E_VECTOR(ed, in_ofs);
+				qcvm->globals[OFS_PARM0 + 3*ofs] = vector[0];
+				qcvm->globals[OFS_PARM0 + 3*ofs + 1] = vector[1];
+				qcvm->globals[OFS_PARM0 + 3*ofs + 2] = vector[2];
+				fill_vector = false;
+			}
+			else
+			{
+				qcvm->globals[OFS_PARM0 + 3*ofs] = E_FLOAT(ed, in_ofs);
+			}
 
-    if (fnum != 0)
-    {
-        PR_ExecuteProgram(fnum);
+			break;
+		case progsarg_vector:
+			qcvm->globals[OFS_PARM0 + 3*ofs] = arg.value.v[0];
+			qcvm->globals[OFS_PARM0 + 3*ofs + 1] = arg.value.v[1];
+			qcvm->globals[OFS_PARM0 + 3*ofs + 2] = arg.value.v[2];
+			fill_vector = false;
+			break;
+		case progsarg_string:
+			((string_t *)qcvm->globals)[OFS_PARM0 + 3*ofs] =
+				PR_SetEngineString(arg.value.s);
+			break;
+		case progsarg_float:
+		case progsarg_int:
+			qcvm->globals[OFS_PARM0 + 3*ofs] = arg.value.f;
+		}
+		
+		if (fill_vector)
+		{
+			qcvm->globals[OFS_PARM0 + 3*ofs + 1] = 0.f;
+			qcvm->globals[OFS_PARM0 + 3*ofs + 2] = 0.f;
+		}
+	}
 
-        if (profile) {
-            Con_Printf("  -----\n");
-            Con_Printf("%d instructions\n", last_profile);
-        }
-    }
-    else
-    {
-        Con_Printf("Can't call function \"%s\".\n", argv[0]);
-    }
+	for (; ofs < 8; ofs++)
+	{
+		qcvm->globals[OFS_PARM0 + 3*ofs] = 0.f;
+		qcvm->globals[OFS_PARM0 + 3*ofs + 1] = 0.f;
+		qcvm->globals[OFS_PARM0 + 3*ofs + 2] = 0.f;
+	}
+
+	if (fnum != 0)
+	{
+		PR_ExecuteProgram(fnum);
+
+		if (profile) {
+			Con_Printf("  -----\n");
+			Con_Printf("%d instructions\n", last_profile);
+		}
+	}
+	else
+	{
+		Con_Printf("Can't call function %s.\n", argv[0]);
+	}
 }
 
 #define MAX_SUBCMDCALL_ARGS 9
 static void PR_ProgsCmd (void)
 {
 	qcvm_t	*oldqcvm;
-    int argc, idx, profile;
-    const char *subcmdcall_args[MAX_SUBCMDCALL_ARGS];
+	int argc, idx, profile;
+	const char *subcmdcall_args[MAX_SUBCMDCALL_ARGS];
 
-    if (!sv.active)
-    {
-        Con_Printf("Server is not active.\n");
-        return;
-    }
+	if (!sv.active)
+	{
+		Con_Printf("Server is not active.\n");
+		return;
+	}
 
-    if (Cmd_Argc() < 2)
-    {
-        Con_Printf("Missing sub-command.\n");
-        return;
-    }
+	if (Cmd_Argc() < 2)
+	{
+		Con_Printf("Missing sub-command.\n");
+		return;
+	}
 
 	PR_PushQCVM(&sv.qcvm, &oldqcvm);
 
-    if (strcmp(Cmd_Argv(1), "profile"))
-        profile = false;
-    else
-        profile = true;
+	if (strcmp(Cmd_Argv(1), "profile"))
+		profile = false;
+	else
+		profile = true;
 
-    if (!strcmp(Cmd_Argv(1), "print"))
-    {
-        if (Cmd_Argc() < 3)
-        {
-            Con_Printf("Insufficient arguments for \"print\".\n");
-            goto cleanup;
-        }
+	if (!strcmp(Cmd_Argv(1), "print"))
+	{
+		if (Cmd_Argc() < 3)
+		{
+			Con_Printf("Insufficient arguments for \"print\".\n");
+			goto cleanup;
+		}
 
-        PR_SubCmdPrint(Cmd_Argv(2));
-    }
-    else if (profile || !strcmp(Cmd_Argv(1), "call"))
-    {
-        if (Cmd_Argc() < 3)
-        {
-            Con_Printf("Insufficient arguments for \"call\".\n");
-            goto cleanup;
-        }
+		PR_SubCmdPrint(Cmd_Argv(2));
+	}
+	else if (profile || !strcmp(Cmd_Argv(1), "call"))
+	{
+		if (Cmd_Argc() < 3)
+		{
+			Con_Printf("Insufficient arguments for \"call\".\n");
+			goto cleanup;
+		}
 
-        argc = q_min(Cmd_Argc() - 2, MAX_SUBCMDCALL_ARGS);
+		argc = q_min(Cmd_Argc() - 2, MAX_SUBCMDCALL_ARGS);
 
-        for (idx = 0; idx < argc; idx++)
-        {
-            subcmdcall_args[idx] = Cmd_Argv(idx + 2);
-        }
+		for (idx = 0; idx < argc; idx++)
+		{
+			subcmdcall_args[idx] = Cmd_Argv(idx + 2);
+		}
 
-        PR_SubCmdCall(argc, subcmdcall_args, profile);
-    }
-    else
-    {
-        Con_Printf("Unknown sub-command \"%s\".\n", Cmd_Argv(1));
-    }
+		PR_SubCmdCall(argc, subcmdcall_args, profile);
+	}
+	else
+	{
+		Con_Printf("Unknown sub-command \"%s\".\n", Cmd_Argv(1));
+	}
 
 cleanup:
 	PR_PopQCVM(oldqcvm);
@@ -2464,7 +2491,7 @@ void PR_Init (void)
 	Cmd_AddCommand ("edicts", ED_PrintEdicts);
 	Cmd_AddCommand ("edictcount", ED_Count);
 	Cmd_AddCommand ("profile", PR_Profile_f);
-    Cmd_AddCommand ("progs", PR_ProgsCmd);
+	Cmd_AddCommand ("progs", PR_ProgsCmd);
 	Cvar_RegisterVariable (&nomonsters);
 	Cvar_SetCallback (&nomonsters, ED_Nomonsters_f);
 	Cvar_RegisterVariable (&gamecfg);
