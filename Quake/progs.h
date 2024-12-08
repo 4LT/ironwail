@@ -398,6 +398,8 @@ void ED_PrintEdicts (void);
 void ED_PrintNum (int ent);
 ddef_t *ED_FindGlobal (const char *name);
 ddef_t *ED_FindField (const char *name);
+void PR_CheckBuiltinExtension (dfunction_t *func);
+int PR_MakeTempString (const char *val);
 
 eval_t *GetEdictFieldValue(edict_t *ed, int fldofs);
 eval_t *GetEdictFieldValueByName(edict_t *ed, const char *name);
