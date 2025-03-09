@@ -773,7 +773,7 @@ IN_ApplyDeadzone
 
 in: raw joystick axis values converted to floats in +-1
 out: applies a circular inner deadzone and a circular outer threshold and clamps the magnitude at 1
-     (my 360 controller is slightly non-circular and the stick travels further on the diagonals)
+	 (my 360 controller is slightly non-circular and the stick travels further on the diagonals)
 
 deadzone is expected to satisfy 0 < deadzone < 1 - outer_threshold
 outer_threshold is expected to satisfy 0 < outer_threshold < 1 - deadzone
@@ -1615,7 +1615,7 @@ void IN_SendKeyEvents (void)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			if (event.button.button < 1 ||
-			    event.button.button > Q_COUNTOF(buttonremap))
+				event.button.button > Q_COUNTOF(buttonremap))
 			{
 				Con_Printf ("Ignored event for mouse button %d\n",
 							event.button.button);

@@ -30,8 +30,8 @@
 #include <limits.h>
 
 #if defined(PLATFORM_BSD) || defined(PLATFORM_OSX)	|| \
-    defined(PLATFORM_AMIGA) /* bsdsocket.library */	|| \
-    defined(__GNU__) /* GNU/Hurd */ || defined(__riscos__) || \
+	defined(PLATFORM_AMIGA) /* bsdsocket.library */	|| \
+	defined(__GNU__) /* GNU/Hurd */ || defined(__riscos__) || \
 	defined(PLATFORM_HAIKU) /* Haiku OS */
 /* struct sockaddr has unsigned char sa_len as the first member in BSD
  * variants and the family member is also an unsigned char instead of an

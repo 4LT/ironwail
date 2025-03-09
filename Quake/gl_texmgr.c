@@ -1364,8 +1364,8 @@ static void TexMgr_LoadImage8 (gltexture_t *glt, byte *data)
 
 	// HACK HACK HACK -- taken from tomazquake
 	if (strstr(glt->name, "shot1sid") &&
-	    glt->width == 32 && glt->height == 32 &&
-	    CRC_Block(data, 1024) == 65393)
+		glt->width == 32 && glt->height == 32 &&
+		CRC_Block(data, 1024) == 65393)
 	{
 		// This texture in b_shell1.bsp has some of the first 32 pixels painted white.
 		// They are invisible in software, but look really ugly in GL. So we just copy
@@ -1473,7 +1473,7 @@ TexMgr_LoadImageEx -- the one entry point for loading all textures
 ================
 */
 gltexture_t *TexMgr_LoadImageEx (qmodel_t *owner, const char *name, int width, int height, int depth, enum srcformat format,
-			       byte *data, const char *source_file, src_offset_t source_offset, unsigned flags)
+				   byte *data, const char *source_file, src_offset_t source_offset, unsigned flags)
 {
 	unsigned short crc = 0;
 	gltexture_t *glt = NULL;
@@ -1569,7 +1569,7 @@ TexMgr_LoadImage
 ================
 */
 gltexture_t *TexMgr_LoadImage (qmodel_t *owner, const char *name, int width, int height, enum srcformat format,
-			       byte *data, const char *source_file, src_offset_t source_offset, unsigned flags)
+				   byte *data, const char *source_file, src_offset_t source_offset, unsigned flags)
 {
 	return TexMgr_LoadImageEx (owner, name, width, height, 1, format, data, source_file, source_offset, flags);
 }

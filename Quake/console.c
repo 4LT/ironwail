@@ -441,9 +441,9 @@ static qboolean Con_GetNormalizedSelection (conofs_t *begin, conofs_t *end)
 Con_TestWordBoundary
 
 Returns:
-     < 0 if on a word boundary and non-whitespace characters are to the left
-       0 if not on a word boundary
-     > 0 if on a word boundary and non-whitespace characters are to the right
+	 < 0 if on a word boundary and non-whitespace characters are to the left
+	   0 if not on a word boundary
+	 > 0 if on a word boundary and non-whitespace characters are to the right
 ================
 */
 static int Con_TestWordBoundary (int pos, const char *text, int len)
@@ -2058,7 +2058,7 @@ void Con_TabComplete (tabcomplete_t mode)
 
 // if cursor is at end of string, let's append a space to make life easier
 	if (key_linepos < MAXCMDLINE - 1 &&
-	    key_lines[edit_line][key_linepos] == 0 && bash_singlematch)
+		key_lines[edit_line][key_linepos] == 0 && bash_singlematch)
 	{
 		key_lines[edit_line][key_linepos] = ' ';
 		key_linepos++;

@@ -45,8 +45,8 @@ static const char st_to_vec[6][3] =
 	{-3,1,2},
 	{1,3,2},
 	{-1,-3,2},
- 	{-2,-1,3},		// straight up
- 	{2,-1,-3}		// straight down
+	{-2,-1,3},		// straight up
+	{2,-1,-3}		// straight down
 };
 
 float skyfog; // ericw

@@ -222,18 +222,18 @@ qboolean Image_WriteTGA (const char *name, byte *data, int width, int height, in
 
 typedef struct
 {
-    char			signature;
-    char			version;
-    char			encoding;
-    char			bits_per_pixel;
-    unsigned short	xmin,ymin,xmax,ymax;
-    unsigned short	hdpi,vdpi;
-    byte			colortable[48];
-    char			reserved;
-    char			color_planes;
-    unsigned short	bytes_per_line;
-    unsigned short	palette_type;
-    char			filler[58];
+	char			signature;
+	char			version;
+	char			encoding;
+	char			bits_per_pixel;
+	unsigned short	xmin,ymin,xmax,ymax;
+	unsigned short	hdpi,vdpi;
+	byte			colortable[48];
+	char			reserved;
+	char			color_planes;
+	unsigned short	bytes_per_line;
+	unsigned short	palette_type;
+	char			filler[58];
 } pcxheader_t;
 
 /*

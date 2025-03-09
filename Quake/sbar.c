@@ -659,7 +659,7 @@ void Sbar_DrawInventory (void)
 
 	if (rogue)
 	{
-    // check for powered up weapon.
+	// check for powered up weapon.
 		if ( cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
 		{
 			for (i=0;i<5;i++)
@@ -1667,7 +1667,7 @@ void Sbar_Draw (void)
 		return; //johnfitz -- never draw sbar during intermission
 
 	if (sb_updates >= vid.numpages && !gl_clear.value && scr_sbaralpha.value >= 1 //johnfitz -- gl_clear, scr_sbaralpha
-        && vid_gamma.value == 1)                         //ericw -- must draw sbar every frame if doing glsl gamma
+		&& vid_gamma.value == 1)                         //ericw -- must draw sbar every frame if doing glsl gamma
 		return;
 
 	sb_updates++;

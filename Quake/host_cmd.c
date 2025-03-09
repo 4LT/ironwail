@@ -88,7 +88,7 @@ static filelist_item_t *FileList_AddWithData (const char *name, const void *data
 
 	// insert each entry in alphabetical order
 	if (*list == NULL ||
-	    q_strnaturalcmp (item->name, (*list)->name) < 0) //insert at front
+		q_strnaturalcmp (item->name, (*list)->name) < 0) //insert at front
 	{
 		item->next = *list;
 		*list = item;
@@ -3313,23 +3313,23 @@ static void Host_Give_f (void)
 		// MED 01/04/97 added hipnotic give stuff
 		if (hipnotic)
 		{
-		    if (t[0] == '6')
-		    {
+			if (t[0] == '6')
+			{
 			if (t[1] == 'a')
-			    sv_player->v.items = (int)sv_player->v.items | HIT_PROXIMITY_GUN;
+				sv_player->v.items = (int)sv_player->v.items | HIT_PROXIMITY_GUN;
 			else
-			    sv_player->v.items = (int)sv_player->v.items | IT_GRENADE_LAUNCHER;
-		    }
-		    else if (t[0] == '9')
+				sv_player->v.items = (int)sv_player->v.items | IT_GRENADE_LAUNCHER;
+			}
+			else if (t[0] == '9')
 			sv_player->v.items = (int)sv_player->v.items | HIT_LASER_CANNON;
-		    else if (t[0] == '0')
+			else if (t[0] == '0')
 			sv_player->v.items = (int)sv_player->v.items | HIT_MJOLNIR;
-		    else if (t[0] >= '2')
+			else if (t[0] >= '2')
 			sv_player->v.items = (int)sv_player->v.items | (IT_SHOTGUN << (t[0] - '2'));
 		}
 		else
 		{
-		    if (t[0] >= '2')
+			if (t[0] >= '2')
 			sv_player->v.items = (int)sv_player->v.items | (IT_SHOTGUN << (t[0] - '2'));
 		}
 		break;
@@ -3337,8 +3337,8 @@ static void Host_Give_f (void)
 	case 's':
 		if (rogue)
 		{
-		    val = GetEdictFieldValueByName(sv_player, "ammo_shells1");
-		    if (val)
+			val = GetEdictFieldValueByName(sv_player, "ammo_shells1");
+			if (val)
 			val->_float = v;
 		}
 		sv_player->v.ammo_shells = v;
@@ -3347,60 +3347,60 @@ static void Host_Give_f (void)
 	case 'n':
 		if (rogue)
 		{
-		    val = GetEdictFieldValueByName(sv_player, "ammo_nails1");
-		    if (val)
-		    {
+			val = GetEdictFieldValueByName(sv_player, "ammo_nails1");
+			if (val)
+			{
 			val->_float = v;
 			if (sv_player->v.weapon <= IT_LIGHTNING)
-			    sv_player->v.ammo_nails = v;
-		    }
+				sv_player->v.ammo_nails = v;
+			}
 		}
 		else
 		{
-		    sv_player->v.ammo_nails = v;
+			sv_player->v.ammo_nails = v;
 		}
 		break;
 
 	case 'l':
 		if (rogue)
 		{
-		    val = GetEdictFieldValueByName(sv_player, "ammo_lava_nails");
-		    if (val)
-		    {
+			val = GetEdictFieldValueByName(sv_player, "ammo_lava_nails");
+			if (val)
+			{
 			val->_float = v;
 			if (sv_player->v.weapon > IT_LIGHTNING)
-			    sv_player->v.ammo_nails = v;
-		    }
+				sv_player->v.ammo_nails = v;
+			}
 		}
 		break;
 
 	case 'r':
 		if (rogue)
 		{
-		    val = GetEdictFieldValueByName(sv_player, "ammo_rockets1");
-		    if (val)
-		    {
+			val = GetEdictFieldValueByName(sv_player, "ammo_rockets1");
+			if (val)
+			{
 			val->_float = v;
 			if (sv_player->v.weapon <= IT_LIGHTNING)
-			    sv_player->v.ammo_rockets = v;
-		    }
+				sv_player->v.ammo_rockets = v;
+			}
 		}
 		else
 		{
-		    sv_player->v.ammo_rockets = v;
+			sv_player->v.ammo_rockets = v;
 		}
 		break;
 
 	case 'm':
 		if (rogue)
 		{
-		    val = GetEdictFieldValueByName(sv_player, "ammo_multi_rockets");
-		    if (val)
-		    {
+			val = GetEdictFieldValueByName(sv_player, "ammo_multi_rockets");
+			if (val)
+			{
 			val->_float = v;
 			if (sv_player->v.weapon > IT_LIGHTNING)
-			    sv_player->v.ammo_rockets = v;
-		    }
+				sv_player->v.ammo_rockets = v;
+			}
 		}
 		break;
 
@@ -3411,30 +3411,30 @@ static void Host_Give_f (void)
 	case 'c':
 		if (rogue)
 		{
-		    val = GetEdictFieldValueByName(sv_player, "ammo_cells1");
-		    if (val)
-		    {
+			val = GetEdictFieldValueByName(sv_player, "ammo_cells1");
+			if (val)
+			{
 			val->_float = v;
 			if (sv_player->v.weapon <= IT_LIGHTNING)
-			    sv_player->v.ammo_cells = v;
-		    }
+				sv_player->v.ammo_cells = v;
+			}
 		}
 		else
 		{
-		    sv_player->v.ammo_cells = v;
+			sv_player->v.ammo_cells = v;
 		}
 		break;
 
 	case 'p':
 		if (rogue)
 		{
-		    val = GetEdictFieldValueByName(sv_player, "ammo_plasma");
-		    if (val)
-		    {
+			val = GetEdictFieldValueByName(sv_player, "ammo_plasma");
+			if (val)
+			{
 			val->_float = v;
 			if (sv_player->v.weapon > IT_LIGHTNING)
-			    sv_player->v.ammo_cells = v;
-		    }
+				sv_player->v.ammo_cells = v;
+			}
 		}
 		break;
 
@@ -3442,25 +3442,25 @@ static void Host_Give_f (void)
 	case 'a':
 		if (v > 150)
 		{
-		    sv_player->v.armortype = 0.8;
-		    sv_player->v.armorvalue = v;
-		    sv_player->v.items = sv_player->v.items -
+			sv_player->v.armortype = 0.8;
+			sv_player->v.armorvalue = v;
+			sv_player->v.items = sv_player->v.items -
 					((int)(sv_player->v.items) & (int)(IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) +
 					IT_ARMOR3;
 		}
 		else if (v > 100)
 		{
-		    sv_player->v.armortype = 0.6;
-		    sv_player->v.armorvalue = v;
-		    sv_player->v.items = sv_player->v.items -
+			sv_player->v.armortype = 0.6;
+			sv_player->v.armorvalue = v;
+			sv_player->v.items = sv_player->v.items -
 					((int)(sv_player->v.items) & (int)(IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) +
 					IT_ARMOR2;
 		}
 		else if (v >= 0)
 		{
-		    sv_player->v.armortype = 0.3;
-		    sv_player->v.armorvalue = v;
-		    sv_player->v.items = sv_player->v.items -
+			sv_player->v.armortype = 0.3;
+			sv_player->v.armorvalue = v;
+			sv_player->v.items = sv_player->v.items -
 					((int)(sv_player->v.items) & (int)(IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) +
 					IT_ARMOR1;
 		}

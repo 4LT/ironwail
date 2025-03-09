@@ -124,8 +124,8 @@ static qboolean WAV_ReadRIFFHeader(const char *name, FILE *file, snd_info_t *inf
 	qboolean ok = true;
 
 	if (fread(dump, 1, 12, file) < 12 ||
-	    strncmp(dump, "RIFF", 4) != 0 ||
-	    strncmp(&dump[8], "WAVE", 4) != 0)
+		strncmp(dump, "RIFF", 4) != 0 ||
+		strncmp(&dump[8], "WAVE", 4) != 0)
 	{
 		Con_Printf("%s is missing RIFF/WAVE chunks\n", name);
 		return false;

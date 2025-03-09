@@ -59,8 +59,8 @@
 #   endif
 
 #elif defined(__MORPHOS__) || defined(__AROS__) || defined(AMIGAOS)	|| \
-      defined(__amigaos__) || defined(__amigaos4__) ||defined(__amigados__) || \
-      defined(AMIGA) || defined(_AMIGA) || defined(__AMIGA__)
+	  defined(__amigaos__) || defined(__amigaos4__) ||defined(__amigados__) || \
+	  defined(AMIGA) || defined(_AMIGA) || defined(__AMIGA__)
 
 #   if !defined(PLATFORM_AMIGA)
 #	define	PLATFORM_AMIGA		1
@@ -81,15 +81,15 @@
 #else	/* here goes the unix platforms */
 
 #if defined(__unix) || defined(__unix__) || defined(unix)	|| \
-    defined(__linux__) || defined(__linux)			|| \
-    defined(__FreeBSD__) || defined(__DragonFly__)		|| \
-    defined(__FreeBSD_kernel__) /* Debian GNU/kFreeBSD */	|| \
-    defined(__OpenBSD__) || defined(__NetBSD__)			|| \
-    defined(__hpux) || defined(__hpux__) || defined(_hpux)	|| \
-    defined(__sun) || defined(sun)				|| \
-    defined(__sgi) || defined(sgi) || defined(__sgi__)		|| \
-    defined(__GNU__) /* GNU/Hurd */				|| \
-    defined(__QNX__) || defined(__QNXNTO__)
+	defined(__linux__) || defined(__linux)			|| \
+	defined(__FreeBSD__) || defined(__DragonFly__)		|| \
+	defined(__FreeBSD_kernel__) /* Debian GNU/kFreeBSD */	|| \
+	defined(__OpenBSD__) || defined(__NetBSD__)			|| \
+	defined(__hpux) || defined(__hpux__) || defined(_hpux)	|| \
+	defined(__sun) || defined(sun)				|| \
+	defined(__sgi) || defined(sgi) || defined(__sgi__)		|| \
+	defined(__GNU__) /* GNU/Hurd */				|| \
+	defined(__QNX__) || defined(__QNXNTO__)
 #   if !defined(PLATFORM_UNIX)
 #	define	PLATFORM_UNIX		1
 #   endif
@@ -106,8 +106,8 @@
 
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)		|| \
-    defined(__FreeBSD_kernel__) /* Debian GNU/kFreeBSD */	|| \
-    defined(__OpenBSD__) || defined(__NetBSD__)
+	defined(__FreeBSD_kernel__) /* Debian GNU/kFreeBSD */	|| \
+	defined(__OpenBSD__) || defined(__NetBSD__)
 #   if !defined(PLATFORM_BSD)
 #	define	PLATFORM_BSD		1
 #   endif

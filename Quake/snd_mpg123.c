@@ -101,7 +101,7 @@ static qboolean S_MP3_CodecOpenStream (snd_stream_t *stream)
 	}
 
 	if (mpg123_replace_reader_handle(priv->handle, mp3_read, mp3_seek, NULL) != MPG123_OK ||
-	    mpg123_open_handle(priv->handle, &stream->fh) != MPG123_OK)
+		mpg123_open_handle(priv->handle, &stream->fh) != MPG123_OK)
 	{
 		Con_Printf("Unable to open mpg123 handle\n");
 		goto _fail;
@@ -166,7 +166,7 @@ _fail:
 		if (priv->handle)
 		{
 			if (priv->handle_open)
-			    mpg123_close(priv->handle);
+				mpg123_close(priv->handle);
 			mpg123_delete(priv->handle);
 		}
 		Z_Free(stream->priv);

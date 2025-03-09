@@ -232,8 +232,8 @@ static int probe_umx   (fshandle_t *f, const struct upkg_hdr *hdr,
 	fsiz = FS_filelength (f);
 
 	if (hdr->name_offset	>= fsiz ||
-	    hdr->export_offset	>= fsiz ||
-	    hdr->import_offset	>= fsiz) {
+		hdr->export_offset	>= fsiz ||
+		hdr->import_offset	>= fsiz) {
 		Con_DPrintf("Illegal values in header.\n");
 		return -1;
 	}
@@ -296,11 +296,11 @@ static int32_t probe_header (fshandle_t *f, struct upkg_hdr *hdr)
 		return -1;
 	}
 	if (hdr->name_count	< 0	||
-	    hdr->export_count	< 0	||
-	    hdr->import_count	< 0	||
-	    hdr->name_offset	< 36	||
-	    hdr->export_offset	< 36	||
-	    hdr->import_offset	< 36) {
+		hdr->export_count	< 0	||
+		hdr->import_count	< 0	||
+		hdr->name_offset	< 36	||
+		hdr->export_offset	< 36	||
+		hdr->import_offset	< 36) {
 		Con_DPrintf("Illegal values in header.\n");
 		return -1;
 	}

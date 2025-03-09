@@ -337,7 +337,7 @@ int WIPX_StringToAddr (const char *string, struct qsockaddr *addr)
 	if (sscanf (buf, "%x", &val) != 1)		\
 		return -1;				\
 	((struct sockaddr_ipx *)addr)->dest = val;	\
-      } while (0)
+	  } while (0)
 
 	DO(0, sa_netnum[0]);
 	DO(2, sa_netnum[1]);

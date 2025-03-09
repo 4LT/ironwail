@@ -1465,7 +1465,7 @@ void M_ScanSaves (void)
 			continue;
 		}
 		if (fscanf(f, "%i\n", &version) != 1 ||
-		    fscanf(f, "%79s\n", name)   != 1) {
+			fscanf(f, "%79s\n", name)   != 1) {
 			fclose(f);
 			continue;
 		}
@@ -2700,8 +2700,8 @@ static void VID_Menu_RebuildRateList (void)
 	{
 		//rate list is limited to rates available with current width/height
 		if (modelist[i].width != vid_width.value ||
-		    modelist[i].height != vid_height.value ||
-		    modelist[i].bpp < 24)
+			modelist[i].height != vid_height.value ||
+			modelist[i].bpp < 24)
 			continue;
 
 		r = modelist[i].refreshrate;

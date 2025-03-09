@@ -1765,8 +1765,8 @@ void SCR_ScreenShot_f (void)
 		const char	*requested_ext = Cmd_Argv (1);
 
 		if (!q_strcasecmp ("png", requested_ext)
-		    || !q_strcasecmp ("tga", requested_ext)
-		    || !q_strcasecmp ("jpg", requested_ext))
+			|| !q_strcasecmp ("tga", requested_ext)
+			|| !q_strcasecmp ("jpg", requested_ext))
 			Q_strncpy (ext, requested_ext, sizeof(ext));
 		else
 		{
@@ -2023,8 +2023,8 @@ int SCR_ModalMessage (const char *text, float timeout) //johnfitz -- timeout
 ==================
 SCR_TileClear
 johnfitz -- modified to use glwidth/glheight instead of vid.width/vid.height
-	    also fixed the dimentions of right and top panels
-	    also added scr_tileclear_updates
+		also fixed the dimentions of right and top panels
+		also added scr_tileclear_updates
 ==================
 */
 void SCR_TileClear (void)

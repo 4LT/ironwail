@@ -209,7 +209,7 @@ flac_write_func (const FLAC__StreamDecoder *decoder,
 
 static void
 flac_meta_func (const FLAC__StreamDecoder *decoder,
-			    const FLAC__StreamMetadata *metadata, void *client_data)
+				const FLAC__StreamMetadata *metadata, void *client_data)
 {
 	flacfile_t *ff = (flacfile_t *) client_data;
 	if (metadata->type == FLAC__METADATA_TYPE_STREAMINFO)

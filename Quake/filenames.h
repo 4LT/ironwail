@@ -31,9 +31,9 @@
 
 /* ---------------------- Windows, DOS, OS2: ---------------------- */
 #if defined(__MSDOS__) || defined(__DOS__) || defined(__DJGPP__) || \
-    defined(_MSDOS) || defined(__OS2__) || defined(__EMX__) || \
-    defined(_WIN32) || defined(_Windows) || defined(__WINDOWS__) || \
-    defined(__NT__) || defined(__CYGWIN__)
+	defined(_MSDOS) || defined(__OS2__) || defined(__EMX__) || \
+	defined(_WIN32) || defined(_Windows) || defined(__WINDOWS__) || \
+	defined(__NT__) || defined(__CYGWIN__)
 
 #define HAVE_DOS_BASED_FILE_SYSTEM 1
 #define HAVE_CASE_INSENSITIVE_FILE_SYSTEM 1
@@ -60,59 +60,59 @@
 #ifdef __cplusplus
 static inline char *FIND_FIRST_DIRSEP(char *_the_path) {
 /* FIXME: What about C:FOO ? */
-    char *p1 = strchr(_the_path, '/');
-    char *p2 = strchr(_the_path, '\\');
-    if (p1 == NULL) return p2;
-    if (p2 == NULL) return p1;
-    return (p1 < p2)? p1 : p2;
+	char *p1 = strchr(_the_path, '/');
+	char *p2 = strchr(_the_path, '\\');
+	if (p1 == NULL) return p2;
+	if (p2 == NULL) return p1;
+	return (p1 < p2)? p1 : p2;
 }
 static inline char *FIND_LAST_DIRSEP (char *_the_path) {
 /* FIXME: What about C:FOO ? */
-    char *p1 = strrchr(_the_path, '/');
-    char *p2 = strrchr(_the_path, '\\');
-    if (p1 == NULL) return p2;
-    if (p2 == NULL) return p1;
-    return (p1 > p2)? p1 : p2;
+	char *p1 = strrchr(_the_path, '/');
+	char *p2 = strrchr(_the_path, '\\');
+	if (p1 == NULL) return p2;
+	if (p2 == NULL) return p1;
+	return (p1 > p2)? p1 : p2;
 }
 static inline const char *FIND_FIRST_DIRSEP(const char *_the_path) {
 /* FIXME: What about C:FOO ? */
-    const char *p1 = strchr(_the_path, '/');
-    const char *p2 = strchr(_the_path, '\\');
-    if (p1 == NULL) return p2;
-    if (p2 == NULL) return p1;
-    return (p1 < p2)? p1 : p2;
+	const char *p1 = strchr(_the_path, '/');
+	const char *p2 = strchr(_the_path, '\\');
+	if (p1 == NULL) return p2;
+	if (p2 == NULL) return p1;
+	return (p1 < p2)? p1 : p2;
 }
 static inline const char *FIND_LAST_DIRSEP (const char *_the_path) {
 /* FIXME: What about C:FOO ? */
-    const char *p1 = strrchr(_the_path, '/');
-    const char *p2 = strrchr(_the_path, '\\');
-    if (p1 == NULL) return p2;
-    if (p2 == NULL) return p1;
-    return (p1 > p2)? p1 : p2;
+	const char *p1 = strrchr(_the_path, '/');
+	const char *p2 = strrchr(_the_path, '\\');
+	if (p1 == NULL) return p2;
+	if (p2 == NULL) return p1;
+	return (p1 > p2)? p1 : p2;
 }
 #else
 static inline char *FIND_FIRST_DIRSEP(const char *_the_path) {
 /* FIXME: What about C:FOO ? */
-    char *p1 = strchr(_the_path, '/');
-    char *p2 = strchr(_the_path, '\\');
-    if (p1 == NULL) return p2;
-    if (p2 == NULL) return p1;
-    return (p1 < p2)? p1 : p2;
+	char *p1 = strchr(_the_path, '/');
+	char *p2 = strchr(_the_path, '\\');
+	if (p1 == NULL) return p2;
+	if (p2 == NULL) return p1;
+	return (p1 < p2)? p1 : p2;
 }
 static inline char *FIND_LAST_DIRSEP (const char *_the_path) {
 /* FIXME: What about C:FOO ? */
-    char *p1 = strrchr(_the_path, '/');
-    char *p2 = strrchr(_the_path, '\\');
-    if (p1 == NULL) return p2;
-    if (p2 == NULL) return p1;
-    return (p1 > p2)? p1 : p2;
+	char *p1 = strrchr(_the_path, '/');
+	char *p2 = strrchr(_the_path, '\\');
+	if (p1 == NULL) return p2;
+	if (p2 == NULL) return p1;
+	return (p1 > p2)? p1 : p2;
 }
 #endif /* C++ */
 
 /* ----------------- AmigaOS, MorphOS, AROS, etc: ----------------- */
 #elif defined(__MORPHOS__) || defined(__AROS__) || defined(AMIGAOS)	|| \
-      defined(__amigaos__) || defined(__amigaos4__) ||defined(__amigados__) || \
-      defined(AMIGA) || defined(_AMIGA) || defined(__AMIGA__)
+	  defined(__amigaos__) || defined(__amigaos4__) ||defined(__amigados__) || \
+	  defined(AMIGA) || defined(_AMIGA) || defined(__AMIGA__)
 
 #define HAS_DRIVE_SPEC(f)	(0) /* */
 #define STRIP_DRIVE_SPEC(f)	(f) /* */
@@ -124,35 +124,35 @@ static inline char *FIND_LAST_DIRSEP (const char *_the_path) {
 
 #ifdef __cplusplus
 static inline char *FIND_FIRST_DIRSEP(char *_the_path) {
-    char *p = strchr(_the_path, ':');
-    if (p != NULL) return p;
-    return strchr(_the_path, '/');
+	char *p = strchr(_the_path, ':');
+	if (p != NULL) return p;
+	return strchr(_the_path, '/');
 }
 static inline char *FIND_LAST_DIRSEP (char *_the_path) {
-    char *p = strrchr(_the_path, '/');
-    if (p != NULL) return p;
-    return strchr(_the_path, ':');
+	char *p = strrchr(_the_path, '/');
+	if (p != NULL) return p;
+	return strchr(_the_path, ':');
 }
 static inline const char *FIND_FIRST_DIRSEP(const char *_the_path) {
-    const char *p = strchr(_the_path, ':');
-    if (p != NULL) return p;
-    return strchr(_the_path, '/');
+	const char *p = strchr(_the_path, ':');
+	if (p != NULL) return p;
+	return strchr(_the_path, '/');
 }
 static inline const char *FIND_LAST_DIRSEP (const char *_the_path) {
-    const char *p = strrchr(_the_path, '/');
-    if (p != NULL) return p;
-    return strchr(_the_path, ':');
+	const char *p = strrchr(_the_path, '/');
+	if (p != NULL) return p;
+	return strchr(_the_path, ':');
 }
 #else
 static inline char *FIND_FIRST_DIRSEP(const char *_the_path) {
-    char *p = strchr(_the_path, ':');
-    if (p != NULL) return p;
-    return strchr(_the_path, '/');
+	char *p = strchr(_the_path, ':');
+	if (p != NULL) return p;
+	return strchr(_the_path, '/');
 }
 static inline char *FIND_LAST_DIRSEP (const char *_the_path) {
-    char *p = strrchr(_the_path, '/');
-    if (p != NULL) return p;
-    return strchr(_the_path, ':');
+	char *p = strrchr(_the_path, '/');
+	if (p != NULL) return p;
+	return strchr(_the_path, ':');
 }
 #endif /* C++ */
 
@@ -168,23 +168,23 @@ static inline char *FIND_LAST_DIRSEP (const char *_the_path) {
 
 #ifdef __cplusplus
 static inline char *FIND_FIRST_DIRSEP(char *_the_path) {
-    return strchr(_the_path, '/');
+	return strchr(_the_path, '/');
 }
 static inline char *FIND_LAST_DIRSEP (char *_the_path) {
-    return strrchr(_the_path, '/');
+	return strrchr(_the_path, '/');
 }
 static inline const char *FIND_FIRST_DIRSEP(const char *_the_path) {
-    return strchr(_the_path, '/');
+	return strchr(_the_path, '/');
 }
 static inline const char *FIND_LAST_DIRSEP (const char *_the_path) {
-    return strrchr(_the_path, '/');
+	return strrchr(_the_path, '/');
 }
 #else
 static inline char *FIND_FIRST_DIRSEP(const char *_the_path) {
-    return strchr(_the_path, '/');
+	return strchr(_the_path, '/');
 }
 static inline char *FIND_LAST_DIRSEP (const char *_the_path) {
-    return strrchr(_the_path, '/');
+	return strrchr(_the_path, '/');
 }
 #endif /* C++ */
 

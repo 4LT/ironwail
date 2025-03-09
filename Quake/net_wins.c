@@ -516,11 +516,11 @@ int WINS_AddrCompare (struct qsockaddr *addr1, struct qsockaddr *addr2)
 		return -1;
 
 	if (((struct sockaddr_in *)addr1)->sin_addr.s_addr !=
-	    ((struct sockaddr_in *)addr2)->sin_addr.s_addr)
+		((struct sockaddr_in *)addr2)->sin_addr.s_addr)
 		return -1;
 
 	if (((struct sockaddr_in *)addr1)->sin_port !=
-	    ((struct sockaddr_in *)addr2)->sin_port)
+		((struct sockaddr_in *)addr2)->sin_port)
 		return 1;
 
 	return 0;

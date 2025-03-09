@@ -1230,9 +1230,9 @@ void Draw_GetCanvasTransform (canvastype type, drawtransform_t *transform)
 		else
 			Draw_Transform (320, 48, s, CANVAS_ALIGN_CENTERX, CANVAS_ALIGN_BOTTOM, transform);
 		break;
-    case CANVAS_SBAR_QW_INV:
+	case CANVAS_SBAR_QW_INV:
 		s = CLAMP(1.0f, scr_sbarscale.value, (float)vid.guiheight / 240.0f);
-        Draw_Transform (48, 48, s, CANVAS_ALIGN_RIGHT, CANVAS_ALIGN_BOTTOM, transform);
+		Draw_Transform (48, 48, s, CANVAS_ALIGN_RIGHT, CANVAS_ALIGN_BOTTOM, transform);
 		break;
 	case CANVAS_SBAR2:
 		s = q_min (vid.guiwidth / 400.0f, vid.guiheight / 225.0f);

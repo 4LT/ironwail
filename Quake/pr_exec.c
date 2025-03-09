@@ -418,8 +418,8 @@ void PR_ExecuteProgram (func_t fnum)
 	st = &qcvm->statements[PR_EnterFunction(f)];
 	startprofile = profile = 0;
 
-    while (1)
-    {
+	while (1)
+	{
 	st++;	/* next statement */
 
 	if (++profile > 0x1000000) /* was 100000 */
@@ -456,8 +456,8 @@ void PR_ExecuteProgram (func_t fnum)
 		break;
 	case OP_MUL_V:
 		OPC->_float = OPA->vector[0] * OPB->vector[0] +
-			      OPA->vector[1] * OPB->vector[1] +
-			      OPA->vector[2] * OPB->vector[2];
+				  OPA->vector[1] * OPB->vector[1] +
+				  OPA->vector[2] * OPB->vector[2];
 		break;
 	case OP_MUL_FV:
 		OPC->vector[0] = OPA->_float * OPB->vector[0];
@@ -522,8 +522,8 @@ void PR_ExecuteProgram (func_t fnum)
 		break;
 	case OP_EQ_V:
 		OPC->_float = (OPA->vector[0] == OPB->vector[0]) &&
-			      (OPA->vector[1] == OPB->vector[1]) &&
-			      (OPA->vector[2] == OPB->vector[2]);
+				  (OPA->vector[1] == OPB->vector[1]) &&
+				  (OPA->vector[2] == OPB->vector[2]);
 		break;
 	case OP_EQ_S:
 		OPC->_float = !strcmp(PR_GetString(OPA->string), PR_GetString(OPB->string));
@@ -540,8 +540,8 @@ void PR_ExecuteProgram (func_t fnum)
 		break;
 	case OP_NE_V:
 		OPC->_float = (OPA->vector[0] != OPB->vector[0]) ||
-			      (OPA->vector[1] != OPB->vector[1]) ||
-			      (OPA->vector[2] != OPB->vector[2]);
+				  (OPA->vector[1] != OPB->vector[1]) ||
+				  (OPA->vector[2] != OPB->vector[2]);
 		break;
 	case OP_NE_S:
 		OPC->_float = strcmp(PR_GetString(OPA->string), PR_GetString(OPB->string));
@@ -686,7 +686,7 @@ void PR_ExecuteProgram (func_t fnum)
 		qcvm->xstatement = st - qcvm->statements;
 		PR_RunError("Bad opcode %i", st->op);
 	}
-    }	/* end of while(1) loop */
+	}	/* end of while(1) loop */
 }
 
 #undef OPA

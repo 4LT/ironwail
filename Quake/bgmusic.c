@@ -106,7 +106,7 @@ static void BGM_Loop_f (void)
 {
 	if (Cmd_Argc() == 2) {
 		if (q_strcasecmp(Cmd_Argv(1),  "0") == 0 ||
-		    q_strcasecmp(Cmd_Argv(1),"off") == 0)
+			q_strcasecmp(Cmd_Argv(1),"off") == 0)
 			bgmloop = false;
 		else if (q_strcasecmp(Cmd_Argv(1), "1") == 0 ||
 			 q_strcasecmp(Cmd_Argv(1),"on") == 0)
@@ -265,7 +265,7 @@ void BGM_Play (const char *filename)
 	while (handler)
 	{
 		if (handler->is_available &&
-		    !q_strcasecmp(ext, handler->ext))
+			!q_strcasecmp(ext, handler->ext))
 			break;
 		handler = handler->next;
 	}

@@ -6,35 +6,35 @@ import unicodedata
 from unidecode import unidecode
 
 unicode_ranges = itertools.chain(
-    range(0x0020, 0x007F+1),    # Basic Latin
-    range(0x00A0, 0x00FF+1),    # Latin-1 Supplement
-    range(0x0100, 0x017F+1),    # Latin Extended-A
-    range(0x0180, 0x024F+1),    # Latin Extended-B
-    range(0x0400, 0x04FF+1),    # Cyrillic
-    range(0x0500, 0x052F+1),    # Cyrillic Supplementary
-    range(0x2000, 0x206F+1),    # General Punctuation
+	range(0x0020, 0x007F+1),    # Basic Latin
+	range(0x00A0, 0x00FF+1),    # Latin-1 Supplement
+	range(0x0100, 0x017F+1),    # Latin Extended-A
+	range(0x0180, 0x024F+1),    # Latin Extended-B
+	range(0x0400, 0x04FF+1),    # Cyrillic
+	range(0x0500, 0x052F+1),    # Cyrillic Supplementary
+	range(0x2000, 0x206F+1),    # General Punctuation
 )
 
 def char_literal(c):
-    s = chr(c)
-    s = s.replace('\\', '\\\\')
-    s = s.replace('\n', '\\n')
-    s = s.replace('\'', '\\\'')
-    return f"'{s}'"
+	s = chr(c)
+	s = s.replace('\\', '\\\\')
+	s = s.replace('\n', '\\n')
+	s = s.replace('\'', '\\\'')
+	return f"'{s}'"
 
 sys.stdout = open('unicode_translit.h', 'w')
 print('/%s Single-character transliterations (based on Unidecode) %s/' % ('*', '*')) # shenanigans to keep the Python code C comment-friendly
 with open(__file__, 'r') as source:
-    print('/%s\n%s\n%s/' % ('*', source.read(), '*'))
+	print('/%s\n%s\n%s/' % ('*', source.read(), '*'))
 print("static const struct { uint16_t code; char remap[2]; } unicode_translit_src[] =\n{")
 for codepoint in unicode_ranges:
-    if 0xd800 <= codepoint <= 0xdfff:
-        continue
-    srcstr = chr(codepoint)
-    src = srcstr.encode()
-    translit = unidecode(srcstr).encode()
-    if src != translit and 0 < len(translit) <= min(2, len(src)):
-        print('\t{0x%04X, {%s}}, // %s' % (codepoint, ', '.join([char_literal(c) for c in translit]), unicodedata.name(srcstr)))
+	if 0xd800 <= codepoint <= 0xdfff:
+		continue
+	srcstr = chr(codepoint)
+	src = srcstr.encode()
+	translit = unidecode(srcstr).encode()
+	if src != translit and 0 < len(translit) <= min(2, len(src)):
+		print('\t{0x%04X, {%s}}, // %s' % (codepoint, ', '.join([char_literal(c) for c in translit]), unicodedata.name(srcstr)))
 print("};")
 */
 static const struct { uint16_t code; char remap[2]; } unicode_translit_src[] =

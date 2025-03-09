@@ -1099,8 +1099,8 @@ const char *Sys_ConsoleInput (void)
 
 		if (recs[0].EventType == KEY_EVENT)
 		{
-		    if (recs[0].Event.KeyEvent.bKeyDown == FALSE)
-		    {
+			if (recs[0].Event.KeyEvent.bKeyDown == FALSE)
+			{
 			ch = recs[0].Event.KeyEvent.uChar.AsciiChar;
 
 			switch (ch)
@@ -1134,7 +1134,7 @@ const char *Sys_ConsoleInput (void)
 
 				break;
 			}
-		    }
+			}
 		}
 	}
 

@@ -15,107 +15,107 @@
 
    * Low-level Deflate/Inflate implementation notes:
 
-     Compression: Use the "tdefl" API's. The compressor supports raw, static, and dynamic blocks, lazy or
-     greedy parsing, match length filtering, RLE-only, and Huffman-only streams. It performs and compresses
-     approximately as well as zlib.
+	 Compression: Use the "tdefl" API's. The compressor supports raw, static, and dynamic blocks, lazy or
+	 greedy parsing, match length filtering, RLE-only, and Huffman-only streams. It performs and compresses
+	 approximately as well as zlib.
 
-     Decompression: Use the "tinfl" API's. The entire decompressor is implemented as a single function
-     coroutine: see tinfl_decompress(). It supports decompression into a 32KB (or larger power of 2) wrapping buffer, or into a memory
-     block large enough to hold the entire file.
+	 Decompression: Use the "tinfl" API's. The entire decompressor is implemented as a single function
+	 coroutine: see tinfl_decompress(). It supports decompression into a 32KB (or larger power of 2) wrapping buffer, or into a memory
+	 block large enough to hold the entire file.
 
-     The low-level tdefl/tinfl API's do not make any use of dynamic memory allocation.
+	 The low-level tdefl/tinfl API's do not make any use of dynamic memory allocation.
 
    * zlib-style API notes:
 
-     miniz.c implements a fairly large subset of zlib. There's enough functionality present for it to be a drop-in
-     zlib replacement in many apps:
-        The z_stream struct, optional memory allocation callbacks
-        deflateInit/deflateInit2/deflate/deflateReset/deflateEnd/deflateBound
-        inflateInit/inflateInit2/inflate/inflateReset/inflateEnd
-        compress, compress2, compressBound, uncompress
-        CRC-32, Adler-32 - Using modern, minimal code size, CPU cache friendly routines.
-        Supports raw deflate streams or standard zlib streams with adler-32 checking.
+	 miniz.c implements a fairly large subset of zlib. There's enough functionality present for it to be a drop-in
+	 zlib replacement in many apps:
+		The z_stream struct, optional memory allocation callbacks
+		deflateInit/deflateInit2/deflate/deflateReset/deflateEnd/deflateBound
+		inflateInit/inflateInit2/inflate/inflateReset/inflateEnd
+		compress, compress2, compressBound, uncompress
+		CRC-32, Adler-32 - Using modern, minimal code size, CPU cache friendly routines.
+		Supports raw deflate streams or standard zlib streams with adler-32 checking.
 
-     Limitations:
-      The callback API's are not implemented yet. No support for gzip headers or zlib static dictionaries.
-      I've tried to closely emulate zlib's various flavors of stream flushing and return status codes, but
-      there are no guarantees that miniz.c pulls this off perfectly.
+	 Limitations:
+	  The callback API's are not implemented yet. No support for gzip headers or zlib static dictionaries.
+	  I've tried to closely emulate zlib's various flavors of stream flushing and return status codes, but
+	  there are no guarantees that miniz.c pulls this off perfectly.
 
    * PNG writing: See the tdefl_write_image_to_png_file_in_memory() function, originally written by
-     Alex Evans. Supports 1-4 bytes/pixel images.
+	 Alex Evans. Supports 1-4 bytes/pixel images.
 
    * ZIP archive API notes:
 
-     The ZIP archive API's where designed with simplicity and efficiency in mind, with just enough abstraction to
-     get the job done with minimal fuss. There are simple API's to retrieve file information, read files from
-     existing archives, create new archives, append new files to existing archives, or clone archive data from
-     one archive to another. It supports archives located in memory or the heap, on disk (using stdio.h),
-     or you can specify custom file read/write callbacks.
+	 The ZIP archive API's where designed with simplicity and efficiency in mind, with just enough abstraction to
+	 get the job done with minimal fuss. There are simple API's to retrieve file information, read files from
+	 existing archives, create new archives, append new files to existing archives, or clone archive data from
+	 one archive to another. It supports archives located in memory or the heap, on disk (using stdio.h),
+	 or you can specify custom file read/write callbacks.
 
-     - Archive reading: Just call this function to read a single file from a disk archive:
+	 - Archive reading: Just call this function to read a single file from a disk archive:
 
-      void *mz_zip_extract_archive_file_to_heap(const char *pZip_filename, const char *pArchive_name,
-        size_t *pSize, mz_uint zip_flags);
+	  void *mz_zip_extract_archive_file_to_heap(const char *pZip_filename, const char *pArchive_name,
+		size_t *pSize, mz_uint zip_flags);
 
-     For more complex cases, use the "mz_zip_reader" functions. Upon opening an archive, the entire central
-     directory is located and read as-is into memory, and subsequent file access only occurs when reading individual files.
+	 For more complex cases, use the "mz_zip_reader" functions. Upon opening an archive, the entire central
+	 directory is located and read as-is into memory, and subsequent file access only occurs when reading individual files.
 
-     - Archives file scanning: The simple way is to use this function to scan a loaded archive for a specific file:
+	 - Archives file scanning: The simple way is to use this function to scan a loaded archive for a specific file:
 
-     int mz_zip_reader_locate_file(mz_zip_archive *pZip, const char *pName, const char *pComment, mz_uint flags);
+	 int mz_zip_reader_locate_file(mz_zip_archive *pZip, const char *pName, const char *pComment, mz_uint flags);
 
-     The locate operation can optionally check file comments too, which (as one example) can be used to identify
-     multiple versions of the same file in an archive. This function uses a simple linear search through the central
-     directory, so it's not very fast.
+	 The locate operation can optionally check file comments too, which (as one example) can be used to identify
+	 multiple versions of the same file in an archive. This function uses a simple linear search through the central
+	 directory, so it's not very fast.
 
-     Alternately, you can iterate through all the files in an archive (using mz_zip_reader_get_num_files()) and
-     retrieve detailed info on each file by calling mz_zip_reader_file_stat().
+	 Alternately, you can iterate through all the files in an archive (using mz_zip_reader_get_num_files()) and
+	 retrieve detailed info on each file by calling mz_zip_reader_file_stat().
 
-     - Archive creation: Use the "mz_zip_writer" functions. The ZIP writer immediately writes compressed file data
-     to disk and builds an exact image of the central directory in memory. The central directory image is written
-     all at once at the end of the archive file when the archive is finalized.
+	 - Archive creation: Use the "mz_zip_writer" functions. The ZIP writer immediately writes compressed file data
+	 to disk and builds an exact image of the central directory in memory. The central directory image is written
+	 all at once at the end of the archive file when the archive is finalized.
 
-     The archive writer can optionally align each file's local header and file data to any power of 2 alignment,
-     which can be useful when the archive will be read from optical media. Also, the writer supports placing
-     arbitrary data blobs at the very beginning of ZIP archives. Archives written using either feature are still
-     readable by any ZIP tool.
+	 The archive writer can optionally align each file's local header and file data to any power of 2 alignment,
+	 which can be useful when the archive will be read from optical media. Also, the writer supports placing
+	 arbitrary data blobs at the very beginning of ZIP archives. Archives written using either feature are still
+	 readable by any ZIP tool.
 
-     - Archive appending: The simple way to add a single file to an archive is to call this function:
+	 - Archive appending: The simple way to add a single file to an archive is to call this function:
 
-      mz_bool mz_zip_add_mem_to_archive_file_in_place(const char *pZip_filename, const char *pArchive_name,
-        const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags);
+	  mz_bool mz_zip_add_mem_to_archive_file_in_place(const char *pZip_filename, const char *pArchive_name,
+		const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags);
 
-     The archive will be created if it doesn't already exist, otherwise it'll be appended to.
-     Note the appending is done in-place and is not an atomic operation, so if something goes wrong
-     during the operation it's possible the archive could be left without a central directory (although the local
-     file headers and file data will be fine, so the archive will be recoverable).
+	 The archive will be created if it doesn't already exist, otherwise it'll be appended to.
+	 Note the appending is done in-place and is not an atomic operation, so if something goes wrong
+	 during the operation it's possible the archive could be left without a central directory (although the local
+	 file headers and file data will be fine, so the archive will be recoverable).
 
-     For more complex archive modification scenarios:
-     1. The safest way is to use a mz_zip_reader to read the existing archive, cloning only those bits you want to
-     preserve into a new archive using using the mz_zip_writer_add_from_zip_reader() function (which compiles the
-     compressed file data as-is). When you're done, delete the old archive and rename the newly written archive, and
-     you're done. This is safe but requires a bunch of temporary disk space or heap memory.
+	 For more complex archive modification scenarios:
+	 1. The safest way is to use a mz_zip_reader to read the existing archive, cloning only those bits you want to
+	 preserve into a new archive using using the mz_zip_writer_add_from_zip_reader() function (which compiles the
+	 compressed file data as-is). When you're done, delete the old archive and rename the newly written archive, and
+	 you're done. This is safe but requires a bunch of temporary disk space or heap memory.
 
-     2. Or, you can convert an mz_zip_reader in-place to an mz_zip_writer using mz_zip_writer_init_from_reader(),
-     append new files as needed, then finalize the archive which will write an updated central directory to the
-     original archive. (This is basically what mz_zip_add_mem_to_archive_file_in_place() does.) There's a
-     possibility that the archive's central directory could be lost with this method if anything goes wrong, though.
+	 2. Or, you can convert an mz_zip_reader in-place to an mz_zip_writer using mz_zip_writer_init_from_reader(),
+	 append new files as needed, then finalize the archive which will write an updated central directory to the
+	 original archive. (This is basically what mz_zip_add_mem_to_archive_file_in_place() does.) There's a
+	 possibility that the archive's central directory could be lost with this method if anything goes wrong, though.
 
-     - ZIP archive support limitations:
-     No spanning support. Extraction functions can only handle unencrypted, stored or deflated files.
-     Requires streams capable of seeking.
+	 - ZIP archive support limitations:
+	 No spanning support. Extraction functions can only handle unencrypted, stored or deflated files.
+	 Requires streams capable of seeking.
 
    * This is a header file library, like stb_image.c. To get only a header file, either cut and paste the
-     below header, or create miniz.h, #define MINIZ_HEADER_FILE_ONLY, and then include miniz.c from it.
+	 below header, or create miniz.h, #define MINIZ_HEADER_FILE_ONLY, and then include miniz.c from it.
 
    * Important: For best perf. be sure to customize the below macros for your target platform:
-     #define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
-     #define MINIZ_LITTLE_ENDIAN 1
-     #define MINIZ_HAS_64BIT_REGISTERS 1
+	 #define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
+	 #define MINIZ_LITTLE_ENDIAN 1
+	 #define MINIZ_HAS_64BIT_REGISTERS 1
 
    * On platforms using glibc, Be sure to "#define _LARGEFILE64_SOURCE 1" before including miniz.c to ensure miniz
-     uses the 64-bit variants: fopen64(), stat64(), etc. Otherwise you won't be able to process large files
-     (i.e. 32-bit stat() fails for me on files > 0x7FFFFFFF bytes).
+	 uses the 64-bit variants: fopen64(), stat64(), etc. Otherwise you won't be able to process large files
+	 (i.e. 32-bit stat() fails for me on files > 0x7FFFFFFF bytes).
 */
 
 #if 1   /* QUAKESPASM-SPECIFIC CONFIG: */
@@ -366,10 +366,10 @@ extern "C" {
 /* TINFL_FLAG_COMPUTE_ADLER32: Force adler-32 checksum computation of the decompressed bytes. */
 enum
 {
-    TINFL_FLAG_PARSE_ZLIB_HEADER = 1,
-    TINFL_FLAG_HAS_MORE_INPUT = 2,
-    TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF = 4,
-    TINFL_FLAG_COMPUTE_ADLER32 = 8
+	TINFL_FLAG_PARSE_ZLIB_HEADER = 1,
+	TINFL_FLAG_HAS_MORE_INPUT = 2,
+	TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF = 4,
+	TINFL_FLAG_COMPUTE_ADLER32 = 8
 };
 
 struct tinfl_decompressor_tag;
@@ -380,45 +380,45 @@ typedef struct tinfl_decompressor_tag tinfl_decompressor;
 
 /* Return status. */
 typedef enum {
-    /* This flags indicates the inflator needs 1 or more input bytes to make forward progress, but the caller is indicating that no more are available. The compressed data */
-    /* is probably corrupted. If you call the inflator again with more bytes it'll try to continue processing the input but this is a BAD sign (either the data is corrupted or you called it incorrectly). */
-    /* If you call it again with no input you'll just get TINFL_STATUS_FAILED_CANNOT_MAKE_PROGRESS again. */
-    TINFL_STATUS_FAILED_CANNOT_MAKE_PROGRESS = -4,
+	/* This flags indicates the inflator needs 1 or more input bytes to make forward progress, but the caller is indicating that no more are available. The compressed data */
+	/* is probably corrupted. If you call the inflator again with more bytes it'll try to continue processing the input but this is a BAD sign (either the data is corrupted or you called it incorrectly). */
+	/* If you call it again with no input you'll just get TINFL_STATUS_FAILED_CANNOT_MAKE_PROGRESS again. */
+	TINFL_STATUS_FAILED_CANNOT_MAKE_PROGRESS = -4,
 
-    /* This flag indicates that one or more of the input parameters was obviously bogus. (You can try calling it again, but if you get this error the calling code is wrong.) */
-    TINFL_STATUS_BAD_PARAM = -3,
+	/* This flag indicates that one or more of the input parameters was obviously bogus. (You can try calling it again, but if you get this error the calling code is wrong.) */
+	TINFL_STATUS_BAD_PARAM = -3,
 
-    /* This flags indicate the inflator is finished but the adler32 check of the uncompressed data didn't match. If you call it again it'll return TINFL_STATUS_DONE. */
-    TINFL_STATUS_ADLER32_MISMATCH = -2,
+	/* This flags indicate the inflator is finished but the adler32 check of the uncompressed data didn't match. If you call it again it'll return TINFL_STATUS_DONE. */
+	TINFL_STATUS_ADLER32_MISMATCH = -2,
 
-    /* This flags indicate the inflator has somehow failed (bad code, corrupted input, etc.). If you call it again without resetting via tinfl_init() it it'll just keep on returning the same status failure code. */
-    TINFL_STATUS_FAILED = -1,
+	/* This flags indicate the inflator has somehow failed (bad code, corrupted input, etc.). If you call it again without resetting via tinfl_init() it it'll just keep on returning the same status failure code. */
+	TINFL_STATUS_FAILED = -1,
 
-    /* Any status code less than TINFL_STATUS_DONE must indicate a failure. */
+	/* Any status code less than TINFL_STATUS_DONE must indicate a failure. */
 
-    /* This flag indicates the inflator has returned every byte of uncompressed data that it can, has consumed every byte that it needed, has successfully reached the end of the deflate stream, and */
-    /* if zlib headers and adler32 checking enabled that it has successfully checked the uncompressed data's adler32. If you call it again you'll just get TINFL_STATUS_DONE over and over again. */
-    TINFL_STATUS_DONE = 0,
+	/* This flag indicates the inflator has returned every byte of uncompressed data that it can, has consumed every byte that it needed, has successfully reached the end of the deflate stream, and */
+	/* if zlib headers and adler32 checking enabled that it has successfully checked the uncompressed data's adler32. If you call it again you'll just get TINFL_STATUS_DONE over and over again. */
+	TINFL_STATUS_DONE = 0,
 
-    /* This flag indicates the inflator MUST have more input data (even 1 byte) before it can make any more forward progress, or you need to clear the TINFL_FLAG_HAS_MORE_INPUT */
-    /* flag on the next call if you don't have any more source data. If the source data was somehow corrupted it's also possible (but unlikely) for the inflator to keep on demanding input to */
-    /* proceed, so be sure to properly set the TINFL_FLAG_HAS_MORE_INPUT flag. */
-    TINFL_STATUS_NEEDS_MORE_INPUT = 1,
+	/* This flag indicates the inflator MUST have more input data (even 1 byte) before it can make any more forward progress, or you need to clear the TINFL_FLAG_HAS_MORE_INPUT */
+	/* flag on the next call if you don't have any more source data. If the source data was somehow corrupted it's also possible (but unlikely) for the inflator to keep on demanding input to */
+	/* proceed, so be sure to properly set the TINFL_FLAG_HAS_MORE_INPUT flag. */
+	TINFL_STATUS_NEEDS_MORE_INPUT = 1,
 
-    /* This flag indicates the inflator definitely has 1 or more bytes of uncompressed data available, but it cannot write this data into the output buffer. */
-    /* Note if the source compressed data was corrupted it's possible for the inflator to return a lot of uncompressed data to the caller. I've been assuming you know how much uncompressed data to expect */
-    /* (either exact or worst case) and will stop calling the inflator and fail after receiving too much. In pure streaming scenarios where you have no idea how many bytes to expect this may not be possible */
-    /* so I may need to add some code to address this. */
-    TINFL_STATUS_HAS_MORE_OUTPUT = 2
+	/* This flag indicates the inflator definitely has 1 or more bytes of uncompressed data available, but it cannot write this data into the output buffer. */
+	/* Note if the source compressed data was corrupted it's possible for the inflator to return a lot of uncompressed data to the caller. I've been assuming you know how much uncompressed data to expect */
+	/* (either exact or worst case) and will stop calling the inflator and fail after receiving too much. In pure streaming scenarios where you have no idea how many bytes to expect this may not be possible */
+	/* so I may need to add some code to address this. */
+	TINFL_STATUS_HAS_MORE_OUTPUT = 2
 } tinfl_status;
 
 /* Initializes the decompressor to its initial state. */
 #define tinfl_init(r)     \
-    do                    \
-    {                     \
-        (r)->m_state = 0; \
-    }                     \
-    MZ_MACRO_END
+	do                    \
+	{                     \
+		(r)->m_state = 0; \
+	}                     \
+	MZ_MACRO_END
 #define tinfl_get_adler32(r) (r)->m_check_adler32
 
 /* Main low-level decompressor coroutine function. This is the only function actually needed for decompression. All the other functions are just high-level helpers for improved usability. */
@@ -428,12 +428,12 @@ MINIZ_EXPORT tinfl_status tinfl_decompress(tinfl_decompressor *r, const mz_uint8
 /* Internal/private bits follow. */
 enum
 {
-    TINFL_MAX_HUFF_TABLES = 3,
-    TINFL_MAX_HUFF_SYMBOLS_0 = 288,
-    TINFL_MAX_HUFF_SYMBOLS_1 = 32,
-    TINFL_MAX_HUFF_SYMBOLS_2 = 19,
-    TINFL_FAST_LOOKUP_BITS = 10,
-    TINFL_FAST_LOOKUP_SIZE = 1 << TINFL_FAST_LOOKUP_BITS
+	TINFL_MAX_HUFF_TABLES = 3,
+	TINFL_MAX_HUFF_SYMBOLS_0 = 288,
+	TINFL_MAX_HUFF_SYMBOLS_1 = 32,
+	TINFL_MAX_HUFF_SYMBOLS_2 = 19,
+	TINFL_FAST_LOOKUP_BITS = 10,
+	TINFL_FAST_LOOKUP_SIZE = 1 << TINFL_FAST_LOOKUP_BITS
 };
 
 #if MINIZ_HAS_64BIT_REGISTERS
@@ -452,17 +452,17 @@ typedef mz_uint32 tinfl_bit_buf_t;
 
 struct tinfl_decompressor_tag
 {
-    mz_uint32 m_state, m_num_bits, m_zhdr0, m_zhdr1, m_z_adler32, m_final, m_type, m_check_adler32, m_dist, m_counter, m_num_extra, m_table_sizes[TINFL_MAX_HUFF_TABLES];
-    tinfl_bit_buf_t m_bit_buf;
-    size_t m_dist_from_out_buf_start;
-    mz_int16 m_look_up[TINFL_MAX_HUFF_TABLES][TINFL_FAST_LOOKUP_SIZE];
-    mz_int16 m_tree_0[TINFL_MAX_HUFF_SYMBOLS_0 * 2];
-    mz_int16 m_tree_1[TINFL_MAX_HUFF_SYMBOLS_1 * 2];
-    mz_int16 m_tree_2[TINFL_MAX_HUFF_SYMBOLS_2 * 2];
-    mz_uint8 m_code_size_0[TINFL_MAX_HUFF_SYMBOLS_0];
-    mz_uint8 m_code_size_1[TINFL_MAX_HUFF_SYMBOLS_1];
-    mz_uint8 m_code_size_2[TINFL_MAX_HUFF_SYMBOLS_2];
-    mz_uint8 m_raw_header[4], m_len_codes[TINFL_MAX_HUFF_SYMBOLS_0 + TINFL_MAX_HUFF_SYMBOLS_1 + 137];
+	mz_uint32 m_state, m_num_bits, m_zhdr0, m_zhdr1, m_z_adler32, m_final, m_type, m_check_adler32, m_dist, m_counter, m_num_extra, m_table_sizes[TINFL_MAX_HUFF_TABLES];
+	tinfl_bit_buf_t m_bit_buf;
+	size_t m_dist_from_out_buf_start;
+	mz_int16 m_look_up[TINFL_MAX_HUFF_TABLES][TINFL_FAST_LOOKUP_SIZE];
+	mz_int16 m_tree_0[TINFL_MAX_HUFF_SYMBOLS_0 * 2];
+	mz_int16 m_tree_1[TINFL_MAX_HUFF_SYMBOLS_1 * 2];
+	mz_int16 m_tree_2[TINFL_MAX_HUFF_SYMBOLS_2 * 2];
+	mz_uint8 m_code_size_0[TINFL_MAX_HUFF_SYMBOLS_0];
+	mz_uint8 m_code_size_1[TINFL_MAX_HUFF_SYMBOLS_1];
+	mz_uint8 m_code_size_2[TINFL_MAX_HUFF_SYMBOLS_2];
+	mz_uint8 m_raw_header[4], m_len_codes[TINFL_MAX_HUFF_SYMBOLS_0 + TINFL_MAX_HUFF_SYMBOLS_1 + 137];
 };
 
 #ifdef __cplusplus
@@ -482,61 +482,61 @@ extern "C" {
 
 enum
 {
-    /* Note: These enums can be reduced as needed to save memory or stack space - they are pretty conservative. */
-    MZ_ZIP_MAX_IO_BUF_SIZE = 64 * 1024,
-    MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE = 512,
-    MZ_ZIP_MAX_ARCHIVE_FILE_COMMENT_SIZE = 512
+	/* Note: These enums can be reduced as needed to save memory or stack space - they are pretty conservative. */
+	MZ_ZIP_MAX_IO_BUF_SIZE = 64 * 1024,
+	MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE = 512,
+	MZ_ZIP_MAX_ARCHIVE_FILE_COMMENT_SIZE = 512
 };
 
 typedef struct
 {
-    /* Central directory file index. */
-    mz_uint32 m_file_index;
+	/* Central directory file index. */
+	mz_uint32 m_file_index;
 
-    /* Byte offset of this entry in the archive's central directory. Note we currently only support up to UINT_MAX or less bytes in the central dir. */
-    mz_uint64 m_central_dir_ofs;
+	/* Byte offset of this entry in the archive's central directory. Note we currently only support up to UINT_MAX or less bytes in the central dir. */
+	mz_uint64 m_central_dir_ofs;
 
-    /* These fields are copied directly from the zip's central dir. */
-    mz_uint16 m_version_made_by;
-    mz_uint16 m_version_needed;
-    mz_uint16 m_bit_flag;
-    mz_uint16 m_method;
+	/* These fields are copied directly from the zip's central dir. */
+	mz_uint16 m_version_made_by;
+	mz_uint16 m_version_needed;
+	mz_uint16 m_bit_flag;
+	mz_uint16 m_method;
 
-    /* CRC-32 of uncompressed data. */
-    mz_uint32 m_crc32;
+	/* CRC-32 of uncompressed data. */
+	mz_uint32 m_crc32;
 
-    /* File's compressed size. */
-    mz_uint64 m_comp_size;
+	/* File's compressed size. */
+	mz_uint64 m_comp_size;
 
-    /* File's uncompressed size. Note, I've seen some old archives where directory entries had 512 bytes for their uncompressed sizes, but when you try to unpack them you actually get 0 bytes. */
-    mz_uint64 m_uncomp_size;
+	/* File's uncompressed size. Note, I've seen some old archives where directory entries had 512 bytes for their uncompressed sizes, but when you try to unpack them you actually get 0 bytes. */
+	mz_uint64 m_uncomp_size;
 
-    /* Zip internal and external file attributes. */
-    mz_uint16 m_internal_attr;
-    mz_uint32 m_external_attr;
+	/* Zip internal and external file attributes. */
+	mz_uint16 m_internal_attr;
+	mz_uint32 m_external_attr;
 
-    /* Entry's local header file offset in bytes. */
-    mz_uint64 m_local_header_ofs;
+	/* Entry's local header file offset in bytes. */
+	mz_uint64 m_local_header_ofs;
 
-    /* Size of comment in bytes. */
-    mz_uint32 m_comment_size;
+	/* Size of comment in bytes. */
+	mz_uint32 m_comment_size;
 
-    /* MZ_TRUE if the entry appears to be a directory. */
-    mz_bool m_is_directory;
+	/* MZ_TRUE if the entry appears to be a directory. */
+	mz_bool m_is_directory;
 
-    /* MZ_TRUE if the entry uses encryption/strong encryption (which miniz_zip doesn't support) */
-    mz_bool m_is_encrypted;
+	/* MZ_TRUE if the entry uses encryption/strong encryption (which miniz_zip doesn't support) */
+	mz_bool m_is_encrypted;
 
-    /* MZ_TRUE if the file is not encrypted, a patch file, and if it uses a compression method we support. */
-    mz_bool m_is_supported;
+	/* MZ_TRUE if the file is not encrypted, a patch file, and if it uses a compression method we support. */
+	mz_bool m_is_supported;
 
-    /* Filename. If string ends in '/' it's a subdirectory entry. */
-    /* Guaranteed to be zero terminated, may be truncated to fit. */
-    char m_filename[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE];
+	/* Filename. If string ends in '/' it's a subdirectory entry. */
+	/* Guaranteed to be zero terminated, may be truncated to fit. */
+	char m_filename[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE];
 
-    /* Comment field. */
-    /* Guaranteed to be zero terminated, may be truncated to fit. */
-    char m_comment[MZ_ZIP_MAX_ARCHIVE_FILE_COMMENT_SIZE];
+	/* Comment field. */
+	/* Guaranteed to be zero terminated, may be truncated to fit. */
+	char m_comment[MZ_ZIP_MAX_ARCHIVE_FILE_COMMENT_SIZE];
 
 } mz_zip_archive_file_stat;
 
@@ -548,98 +548,98 @@ struct mz_zip_internal_state_tag;
 typedef struct mz_zip_internal_state_tag mz_zip_internal_state;
 
 typedef enum {
-    MZ_ZIP_MODE_INVALID = 0,
-    MZ_ZIP_MODE_READING = 1,
-    MZ_ZIP_MODE_WRITING = 2,
-    MZ_ZIP_MODE_WRITING_HAS_BEEN_FINALIZED = 3
+	MZ_ZIP_MODE_INVALID = 0,
+	MZ_ZIP_MODE_READING = 1,
+	MZ_ZIP_MODE_WRITING = 2,
+	MZ_ZIP_MODE_WRITING_HAS_BEEN_FINALIZED = 3
 } mz_zip_mode;
 
 typedef enum {
-    MZ_ZIP_FLAG_CASE_SENSITIVE = 0x0100,
-    MZ_ZIP_FLAG_IGNORE_PATH = 0x0200,
-    MZ_ZIP_FLAG_COMPRESSED_DATA = 0x0400,
-    MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY = 0x0800,
-    MZ_ZIP_FLAG_VALIDATE_LOCATE_FILE_FLAG = 0x1000, /* if enabled, mz_zip_reader_locate_file() will be called on each file as its validated to ensure the func finds the file in the central dir (intended for testing) */
-    MZ_ZIP_FLAG_VALIDATE_HEADERS_ONLY = 0x2000,     /* validate the local headers, but don't decompress the entire file and check the crc32 */
-    MZ_ZIP_FLAG_WRITE_ZIP64 = 0x4000,               /* always use the zip64 file format, instead of the original zip file format with automatic switch to zip64. Use as flags parameter with mz_zip_writer_init*_v2 */
-    MZ_ZIP_FLAG_WRITE_ALLOW_READING = 0x8000,
-    MZ_ZIP_FLAG_ASCII_FILENAME = 0x10000,
-    /*After adding a compressed file, seek back
-    to local file header and set the correct sizes*/
-    MZ_ZIP_FLAG_WRITE_HEADER_SET_SIZE = 0x20000
+	MZ_ZIP_FLAG_CASE_SENSITIVE = 0x0100,
+	MZ_ZIP_FLAG_IGNORE_PATH = 0x0200,
+	MZ_ZIP_FLAG_COMPRESSED_DATA = 0x0400,
+	MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY = 0x0800,
+	MZ_ZIP_FLAG_VALIDATE_LOCATE_FILE_FLAG = 0x1000, /* if enabled, mz_zip_reader_locate_file() will be called on each file as its validated to ensure the func finds the file in the central dir (intended for testing) */
+	MZ_ZIP_FLAG_VALIDATE_HEADERS_ONLY = 0x2000,     /* validate the local headers, but don't decompress the entire file and check the crc32 */
+	MZ_ZIP_FLAG_WRITE_ZIP64 = 0x4000,               /* always use the zip64 file format, instead of the original zip file format with automatic switch to zip64. Use as flags parameter with mz_zip_writer_init*_v2 */
+	MZ_ZIP_FLAG_WRITE_ALLOW_READING = 0x8000,
+	MZ_ZIP_FLAG_ASCII_FILENAME = 0x10000,
+	/*After adding a compressed file, seek back
+	to local file header and set the correct sizes*/
+	MZ_ZIP_FLAG_WRITE_HEADER_SET_SIZE = 0x20000
 } mz_zip_flags;
 
 typedef enum {
-    MZ_ZIP_TYPE_INVALID = 0,
-    MZ_ZIP_TYPE_USER,
-    MZ_ZIP_TYPE_MEMORY,
-    MZ_ZIP_TYPE_HEAP,
-    MZ_ZIP_TYPE_FILE,
-    MZ_ZIP_TYPE_CFILE,
-    MZ_ZIP_TOTAL_TYPES
+	MZ_ZIP_TYPE_INVALID = 0,
+	MZ_ZIP_TYPE_USER,
+	MZ_ZIP_TYPE_MEMORY,
+	MZ_ZIP_TYPE_HEAP,
+	MZ_ZIP_TYPE_FILE,
+	MZ_ZIP_TYPE_CFILE,
+	MZ_ZIP_TOTAL_TYPES
 } mz_zip_type;
 
 /* miniz error codes. Be sure to update mz_zip_get_error_string() if you add or modify this enum. */
 typedef enum {
-    MZ_ZIP_NO_ERROR = 0,
-    MZ_ZIP_UNDEFINED_ERROR,
-    MZ_ZIP_TOO_MANY_FILES,
-    MZ_ZIP_FILE_TOO_LARGE,
-    MZ_ZIP_UNSUPPORTED_METHOD,
-    MZ_ZIP_UNSUPPORTED_ENCRYPTION,
-    MZ_ZIP_UNSUPPORTED_FEATURE,
-    MZ_ZIP_FAILED_FINDING_CENTRAL_DIR,
-    MZ_ZIP_NOT_AN_ARCHIVE,
-    MZ_ZIP_INVALID_HEADER_OR_CORRUPTED,
-    MZ_ZIP_UNSUPPORTED_MULTIDISK,
-    MZ_ZIP_DECOMPRESSION_FAILED,
-    MZ_ZIP_COMPRESSION_FAILED,
-    MZ_ZIP_UNEXPECTED_DECOMPRESSED_SIZE,
-    MZ_ZIP_CRC_CHECK_FAILED,
-    MZ_ZIP_UNSUPPORTED_CDIR_SIZE,
-    MZ_ZIP_ALLOC_FAILED,
-    MZ_ZIP_FILE_OPEN_FAILED,
-    MZ_ZIP_FILE_CREATE_FAILED,
-    MZ_ZIP_FILE_WRITE_FAILED,
-    MZ_ZIP_FILE_READ_FAILED,
-    MZ_ZIP_FILE_CLOSE_FAILED,
-    MZ_ZIP_FILE_SEEK_FAILED,
-    MZ_ZIP_FILE_STAT_FAILED,
-    MZ_ZIP_INVALID_PARAMETER,
-    MZ_ZIP_INVALID_FILENAME,
-    MZ_ZIP_BUF_TOO_SMALL,
-    MZ_ZIP_INTERNAL_ERROR,
-    MZ_ZIP_FILE_NOT_FOUND,
-    MZ_ZIP_ARCHIVE_TOO_LARGE,
-    MZ_ZIP_VALIDATION_FAILED,
-    MZ_ZIP_WRITE_CALLBACK_FAILED,
-    MZ_ZIP_TOTAL_ERRORS
+	MZ_ZIP_NO_ERROR = 0,
+	MZ_ZIP_UNDEFINED_ERROR,
+	MZ_ZIP_TOO_MANY_FILES,
+	MZ_ZIP_FILE_TOO_LARGE,
+	MZ_ZIP_UNSUPPORTED_METHOD,
+	MZ_ZIP_UNSUPPORTED_ENCRYPTION,
+	MZ_ZIP_UNSUPPORTED_FEATURE,
+	MZ_ZIP_FAILED_FINDING_CENTRAL_DIR,
+	MZ_ZIP_NOT_AN_ARCHIVE,
+	MZ_ZIP_INVALID_HEADER_OR_CORRUPTED,
+	MZ_ZIP_UNSUPPORTED_MULTIDISK,
+	MZ_ZIP_DECOMPRESSION_FAILED,
+	MZ_ZIP_COMPRESSION_FAILED,
+	MZ_ZIP_UNEXPECTED_DECOMPRESSED_SIZE,
+	MZ_ZIP_CRC_CHECK_FAILED,
+	MZ_ZIP_UNSUPPORTED_CDIR_SIZE,
+	MZ_ZIP_ALLOC_FAILED,
+	MZ_ZIP_FILE_OPEN_FAILED,
+	MZ_ZIP_FILE_CREATE_FAILED,
+	MZ_ZIP_FILE_WRITE_FAILED,
+	MZ_ZIP_FILE_READ_FAILED,
+	MZ_ZIP_FILE_CLOSE_FAILED,
+	MZ_ZIP_FILE_SEEK_FAILED,
+	MZ_ZIP_FILE_STAT_FAILED,
+	MZ_ZIP_INVALID_PARAMETER,
+	MZ_ZIP_INVALID_FILENAME,
+	MZ_ZIP_BUF_TOO_SMALL,
+	MZ_ZIP_INTERNAL_ERROR,
+	MZ_ZIP_FILE_NOT_FOUND,
+	MZ_ZIP_ARCHIVE_TOO_LARGE,
+	MZ_ZIP_VALIDATION_FAILED,
+	MZ_ZIP_WRITE_CALLBACK_FAILED,
+	MZ_ZIP_TOTAL_ERRORS
 } mz_zip_error;
 
 typedef struct
 {
-    mz_uint64 m_archive_size;
-    mz_uint64 m_central_directory_file_ofs;
+	mz_uint64 m_archive_size;
+	mz_uint64 m_central_directory_file_ofs;
 
-    /* We only support up to UINT32_MAX files in zip64 mode. */
-    mz_uint32 m_total_files;
-    mz_zip_mode m_zip_mode;
-    mz_zip_type m_zip_type;
-    mz_zip_error m_last_error;
+	/* We only support up to UINT32_MAX files in zip64 mode. */
+	mz_uint32 m_total_files;
+	mz_zip_mode m_zip_mode;
+	mz_zip_type m_zip_type;
+	mz_zip_error m_last_error;
 
-    mz_uint64 m_file_offset_alignment;
+	mz_uint64 m_file_offset_alignment;
 
-    mz_alloc_func m_pAlloc;
-    mz_free_func m_pFree;
-    mz_realloc_func m_pRealloc;
-    void *m_pAlloc_opaque;
+	mz_alloc_func m_pAlloc;
+	mz_free_func m_pFree;
+	mz_realloc_func m_pRealloc;
+	void *m_pAlloc_opaque;
 
-    mz_file_read_func m_pRead;
-    mz_file_write_func m_pWrite;
-    mz_file_needs_keepalive m_pNeeds_keepalive;
-    void *m_pIO_opaque;
+	mz_file_read_func m_pRead;
+	mz_file_write_func m_pWrite;
+	mz_file_needs_keepalive m_pNeeds_keepalive;
+	void *m_pIO_opaque;
 
-    mz_zip_internal_state *m_pState;
+	mz_zip_internal_state *m_pState;
 
 } mz_zip_archive;
 
