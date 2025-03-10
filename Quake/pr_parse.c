@@ -19,13 +19,12 @@ static int isnumber(const char *s) {
 parseresult_t PR_ParseCmdArg(const char *arg)
 {
 	parseresult_t result;
-	char *rest;
+	char *tokens, *rest;
 	const char *tok;
 	ddef_t *glob, *fielddef;
 	edict_t *ed;
 	float x, y, z;
 
-    char *tokens = NULL;
 	result.success = false;
 
 	switch(arg[0])
