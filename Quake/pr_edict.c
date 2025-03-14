@@ -580,7 +580,7 @@ static const char *PR_UglySaveValueString (savedata_t *save, int type, eval_t *v
 		q_snprintf (line, sizeof(line), "%s", PR_GetSaveString(save, val->string));
 		break;
 	case ev_entity:
-		q_snprintf (line, sizeof(line), "%i", SAVE_NUM_FOR_EDICT(save, SAVE_PROG_TO_EDICT(save, val->edict)));
+		q_snprintf (line, sizeof(line), "%i", SAVE_NUM_FOR_PROG(save, val->edict));
 		break;
 	case ev_function:
 		f = qcvm->functions + val->function;
@@ -2556,13 +2556,7 @@ int NUM_FOR_EDICT(edict_t *e)
 	return b;
 }
 
-int SAVE_NUM_FOR_EDICT (savedata_t *save, edict_t *e)
-{
-	int		b;
-
-	b = (byte *)e - (byte *)save->edicts;
-	b = b / qcvm->edict_size;
-
+static int save_edict_num(savedata_t *save, int b) {
 	if (b < 0 || b >= save->num_edicts)
 	{
 		SDL_AtomicCAS (&save->abort, 0, -1);
@@ -2570,6 +2564,49 @@ int SAVE_NUM_FOR_EDICT (savedata_t *save, edict_t *e)
 	}
 
 	return b;
+}
+
+int SAVE_NUM_FOR_EDICT (savedata_t *save, edict_t *e)
+{
+	int		b;
+
+	b = (byte *)e - (byte *)save->edicts;
+	b = b / qcvm->edict_size;
+    return save_edict_num(save, b);
+}
+
+int SAVE_NUM_FOR_PROG (savedata_t *save, int byte_ofs)
+{
+    int e_num;
+    qboolean aligned;
+
+    e_num = byte_ofs / qcvm->edict_size;
+    aligned = byte_ofs % qcvm->edict_size == 0;
+
+    if (!aligned)
+        Host_Error ("SAVE_NUM_FOR_PROG: unaligned offset %i", byte_ofs);
+
+    if (e_num < 0 || e_num >= save->num_edicts)
+        Host_Error ("SAVE_NUM_FOR_PROG: bad offset %i", byte_ofs);
+
+    return save_edict_num(save, e_num);
+}
+
+edict_t *PROG_TO_EDICT(int byte_ofs)
+{
+    int e_num;
+    qboolean aligned;
+
+    e_num = byte_ofs / qcvm->edict_size;
+    aligned = byte_ofs % qcvm->edict_size == 0;
+
+    if (!aligned)
+        Host_Error ("PROG_TO_EDICT: unaligned offset %i", byte_ofs);
+    
+    if (e_num < 0 || e_num >= qcvm->num_edicts)
+        Host_Error ("PROG_TO_EDICT: bad offset %i", byte_ofs);
+
+    return (edict_t *)((byte *)qcvm->edicts + byte_ofs);
 }
 
 //===========================================================================

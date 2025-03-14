@@ -355,12 +355,23 @@ int SAVE_NUM_FOR_EDICT (savedata_t *save, edict_t *e);
 #define	NEXT_EDICT(e)		((edict_t *)( (byte *)e + qcvm->edict_size))
 
 #define	EDICT_TO_PROG(e)	(int)((byte *)e - (byte *)qcvm->edicts)
+
+/*
 #define PROG_TO_EDICT(e)	((edict_t *)((byte *)qcvm->edicts + e))
+*/
+edict_t *PROG_TO_EDICT(int);
+
+/*
 #define SAVE_PROG_TO_EDICT(s, e)	((edict_t *)((byte *)s->edicts + e))
+*/
+int SAVE_NUM_FOR_PROG(savedata_t *, int);
 
 #define	G_FLOAT(o)		(qcvm->globals[o])
 #define	G_INT(o)		(*(int *)&qcvm->globals[o])
+/*
 #define	G_EDICT(o)		((edict_t *)((byte *)qcvm->edicts+ *(int *)&qcvm->globals[o]))
+*/
+#define	G_EDICT(o)		(PROG_TO_EDICT(*(int *)&qcvm->globals[o]))
 #define G_EDICTNUM(o)		NUM_FOR_EDICT(G_EDICT(o))
 #define	G_VECTOR(o)		(&qcvm->globals[o])
 #define	G_STRING(o)		(PR_GetString(*(string_t *)&qcvm->globals[o]))
