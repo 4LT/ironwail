@@ -647,6 +647,8 @@ void PR_ExecuteProgram (func_t fnum)
 		qcvm->argc = st->op - OP_CALL0;
 		if (!OPA->function)
 			PR_RunError("NULL function");
+		if (OPA->function < 0 || OPA->function > qcvm->progs->numfunctions)
+			PR_RunError("Function outside bounds");
 		newf = &qcvm->functions[OPA->function];
 		if (newf->first_statement < 0)
 		{ // Built-in function
