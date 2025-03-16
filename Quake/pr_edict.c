@@ -2311,7 +2311,7 @@ static void PR_SubCmdCall (int argc, const char **argv, int profile) {
 	}
 	else 
 	{
-		Con_Printf("Not a function\n");
+		Con_Warning("Not a function\n");
 		return;
 	}
 

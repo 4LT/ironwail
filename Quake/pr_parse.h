@@ -12,10 +12,10 @@ typedef enum
 
 	// literals
 	progsarg_string,
-	progsarg_int,
-	progsarg_entity,
 	progsarg_float,
-	progsarg_vector
+	progsarg_vector,
+	progsarg_int,
+	progsarg_entity
 } progsargkind_e;
 
 typedef struct efield_s {
@@ -38,7 +38,7 @@ typedef struct progsarg_s
 
 typedef struct parseresult_s
 {
-	int success;
+	qboolean success;
 	union {
 		progsarg_t arg;
 		const char *reason;

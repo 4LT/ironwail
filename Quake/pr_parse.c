@@ -24,6 +24,7 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 	ddef_t *glob, *fielddef;
 	edict_t *ed;
 	float x, y, z;
+    int i;
 
 	result.success = false;
 
@@ -82,22 +83,31 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 		result.success = true;
 		break;
 	case '#':
-	case '!':
+	case '$':
 		if (!isnumber(arg + 1))
 		{
 			result.payload.reason = "Not a valid integer";
 			break;
 		}
 
-		result.payload.arg.value.i = atoi(arg + 1);
+        i = atoi(arg + 1);
+		result.payload.arg.value.i = i;
 
-		if (arg[0] == '!')
+		if (arg[0] == '#')
 		{
-			result.payload.arg.kind = progsarg_entity;
+            if (i < 0 || i > qcvm->num_edicts)
+            {
+                result.payload.reason = "Entity out of bounds";
+                break;
+            }
+            else
+            {
+                result.payload.arg.kind = progsarg_entity;
+            }
 		}
 		else
 		{
-			result.payload.arg.kind = progsarg_int;
+            result.payload.arg.kind = progsarg_int;
 		}
 
 		result.success = true;
@@ -107,7 +117,7 @@ parseresult_t PR_ParseCmdArg(const char *arg)
 		result.payload.arg.kind = progsarg_string;
 		result.success = true;
 		break;
-	case '$':
+	case '%':
 		result.payload.reason = "User vars unimplemented";
 		break;
 	default:
@@ -178,7 +188,121 @@ cleanup:
 	return result;
 }
 
+static void SafePrintString(const char *s)
+{
+    if (s)
+        Con_Printf("%s\n", s);
+    else
+        Con_Printf("(null string)\n");
+}
+
+static void PrintFunction(func_t func)
+{
+    if (func == 0)
+        Con_Printf("Null function\n");
+
+    Con_Printf(
+        "Function %i%s\n",
+        func,
+        qcvm->functions[func].first_statement < 0 ? ", built-in" : ""
+    );
+}
+
+static void PrintGlobal(ddef_t *g)
+{
+    unsigned short type = g->type & ~DEF_SAVEGLOBAL;
+
+    switch (type)
+    {
+        case ev_string:
+            SafePrintString(G_STRING(g->ofs));
+            break;
+        case ev_float:
+            Con_Printf("%.3f\n", G_FLOAT(g->ofs));
+            break;
+        case ev_vector:
+            Con_Printf("\'%.3f %.3f %.3f\'\n",
+                G_FLOAT(g->ofs),
+                G_FLOAT(g->ofs + 1),
+                G_FLOAT(g->ofs + 2)
+            );
+            break;
+        case ev_entity:
+            ED_Print(G_EDICT(g->ofs));
+            break;
+        case ev_field:
+            Con_Printf("Field %i\n", G_INT(g->ofs));
+            break;
+        case ev_function:
+            PrintFunction(G_FUNCTION(g->ofs));
+            break;
+
+        default:
+            Con_Printf("Unsupported type %i\n", (signed)type);
+    }
+}
+
+static void PrintEntityField(efield_t ent_fld)
+{
+    float *vec;
+    edict_t *ent = ent_fld.edict;
+    ddef_t *fld = ent_fld.fld;
+    unsigned short type = fld->type & ~DEF_SAVEGLOBAL;
+
+    switch (type)
+    {
+        case ev_string:
+            SafePrintString(E_STRING(ent, fld->ofs));
+            break;
+        case ev_float:
+            Con_Printf("%.3f\n", E_FLOAT(ent, fld->ofs));
+            break;
+        case ev_vector:
+            vec = E_VECTOR(ent, fld->ofs);
+            Con_Printf("\'%.3f %.3f %.3f\'\n", vec[0], vec[1], vec[2]);
+            break;
+        case ev_entity:
+            ED_Print(PROG_TO_EDICT(E_INT(ent, fld->ofs)));
+            break;
+        case ev_function:
+            PrintFunction(E_INT(ent, fld->ofs));
+            break;
+
+        default:
+            Con_Printf("Unsupported type %i\n", (signed)type);
+    }
+}
+
 void PR_PrintArg(progsarg_t arg)
 {
-	Con_Printf("STUB\n");
+    float *vec;
+
+    switch (arg.kind) {
+        case progsarg_global:
+            PrintGlobal(arg.value.g);
+            break;
+        case progsarg_field:
+            PrintEntityField(arg.value.efield);
+            break;
+        case progsarg_string:
+            SafePrintString(arg.value.s);
+            break;
+        case progsarg_float:
+            Con_Printf("%.3f\n", arg.value.f);
+            break;
+        case progsarg_vector:
+            vec = arg.value.v;
+            Con_Printf("\'%.3f %.3f %.3f\'\n", vec[0], vec[1], vec[2]);
+            break;
+        case progsarg_int:
+            Con_Printf("Integer %i\n", arg.value.i);
+            break;
+        case progsarg_entity:
+            ED_Print(EDICT_NUM(arg.value.i));
+            break;
+
+        default:
+            Con_Printf("Unsupported argument kind %i\n", arg.kind);
+    }
 }
+
