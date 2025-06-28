@@ -16,7 +16,7 @@ typedef enum
 	progsarg_vector,
 	progsarg_int,
 	progsarg_entity
-} progsargkind_e;
+} progsargkind_t;
 
 typedef struct efield_s {
 	edict_t *edict;
@@ -25,7 +25,7 @@ typedef struct efield_s {
 
 typedef struct progsarg_s
 {
-	progsargkind_e kind;
+	progsargkind_t kind;
 	union {
 		const char *s;
 		int i;

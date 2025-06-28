@@ -2264,7 +2264,8 @@ static void ED_Nomonsters_f (cvar_t *cvar)
 }
 
 
-static void PR_SubCmdPrint (const char *arg) {
+static void PR_SubCmdPrint (const char *arg)
+{
 	parseresult_t parse_result = PR_ParseCmdArg(arg);
 	
 	if (parse_result.success)
@@ -2277,7 +2278,142 @@ static void PR_SubCmdPrint (const char *arg) {
 	}
 }
 
-static void PR_SubCmdCall (int argc, const char **argv, int profile) {
+static void PR_SubCmdAssign (const char *larg, const char *rarg)
+{
+    parseresult_t dest_result, src_result;
+    progsarg_t dest_arg, src_arg;
+    float *dest_ptr, *src_ptr;
+    etype_t dest_type, src_type;
+    union {
+        int i;
+        float v[3];
+    } value_buf;
+
+    dest_result = PR_ParseCmdArg(larg);
+    
+    if (!dest_result.success)
+    {
+        Con_Printf(
+            "Parse assignment destination: %s\n",
+            dest_result.payload.reason
+        );
+        return;
+    }
+
+    dest_arg = dest_result.payload.arg;
+
+    switch (dest_arg.kind)
+    {
+        case progsarg_global:
+            dest_type = dest_arg.value.g->type & ~DEF_SAVEGLOBAL;
+            dest_ptr = &G_FLOAT(dest_arg.value.g->ofs);
+            break;
+        case progsarg_field:
+            dest_type = dest_arg.value.efield.fld->type & ~DEF_SAVEGLOBAL;
+            dest_ptr = &E_FLOAT(
+                dest_arg.value.efield.edict,
+                dest_arg.value.efield.fld->ofs
+            );
+            break;
+        case progsarg_uservar:
+            Con_Printf("User var STUB\n");
+            return;
+
+        default:
+            Con_Printf("Cannot assign to literal\n");
+            return;
+    }
+
+    src_result = PR_ParseCmdArg(rarg);
+
+    if (!src_result.success)
+    {
+        Con_Printf(
+            "Parse assignment source: %s\n",
+            src_result.payload.reason
+        );
+        return;
+    }
+
+    src_arg = src_result.payload.arg;
+
+    switch (src_arg.kind)
+    {
+        case progsarg_global:
+            src_type = src_arg.value.g->type & ~DEF_SAVEGLOBAL;
+            src_ptr = &G_FLOAT(dest_arg.value.g->ofs);
+            break;
+
+        case progsarg_field:
+            src_type = src_arg.value.efield.fld->type & ~DEF_SAVEGLOBAL;
+            src_ptr = &E_FLOAT(
+                src_arg.value.efield.edict,
+                src_arg.value.efield.fld->ofs
+            );
+            break;
+
+        case progsarg_string:
+            src_type = ev_string;
+            value_buf.i = PR_MakeTempString(src_arg.value.s);
+            src_ptr = value_buf.v;
+            break;
+
+        case progsarg_float:
+            src_type = ev_float;
+            src_ptr = &src_arg.value.f;
+            break;
+
+        case progsarg_vector:
+            src_type = ev_vector;
+            src_ptr = src_arg.value.v;
+            break;
+
+        case progsarg_int:
+            src_type = ev_ext_integer;
+            src_ptr = &src_arg.value.f;
+            break;
+
+        case progsarg_entity:
+            src_type = ev_entity;
+            value_buf.i = src_arg.value.i * qcvm->edict_size;
+            src_ptr = value_buf.v;
+            break;
+
+        default:
+            Con_Printf("Source kind %i STUB\n", src_arg.kind);
+            return;
+    }
+
+    if ((signed)dest_type < 0)
+    {
+        Con_Printf("Bad destination type\n");
+        return;
+    }
+
+    if ((signed)src_type < 0)
+    {
+        Con_Printf("Bad source type\n");
+        return;
+    }
+
+    if (src_type == dest_type)
+    {
+        dest_ptr[0] = src_ptr[0];
+
+        if (dest_type == ev_vector)
+        {
+            dest_ptr[1] = src_ptr[1];
+            dest_ptr[2] = src_ptr[2];
+        }
+    }
+    else
+    {
+        Con_Printf("Incompatible types (%i <- %i)\n", dest_type, src_type);
+    }
+}
+
+static void PR_SubCmdCall (int argc, const char **argv, int profile)
+{
 	int ofs, in_ofs, fill_vector, builtin_idx;
 	float *vector;
 	func_t fnum;
@@ -2480,11 +2616,24 @@ static void PR_ProgsCmd (void)
 
 		PR_SubCmdPrint(Cmd_Argv(2));
 	}
+    else if (!strcmp(Cmd_Argv(1), "set"))
+    {
+        if (Cmd_Argc() < 4)
+        {
+            Con_Printf("Insufficient arguments for \"set\".\n");
+            goto cleanup;
+        }
+
+        PR_SubCmdAssign(Cmd_Argv(2), Cmd_Argv(3));
+    }
 	else if (profile || !strcmp(Cmd_Argv(1), "call"))
 	{
 		if (Cmd_Argc() < 3)
 		{
-			Con_Printf("Insufficient arguments for \"call\".\n");
+            if (profile)
+                Con_Printf("Insufficient arguments for \"profile\".\n");
+            else
+                Con_Printf("Insufficient arguments for \"call\".\n");
 			goto cleanup;
 		}
 
