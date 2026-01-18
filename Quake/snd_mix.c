@@ -34,6 +34,11 @@ static int	snd_vol;
 static float	snd_lofreqlevel;
 static float	snd_hifreqlevel;
 
+#define S24_MAX ((int)0x007fffff)
+#define S24_MIN (~S24_MAX)
+
+typedef int (*limiter_t)(int);
+
 static void Snd_WriteLinearBlastStereo16 (void)
 {
 	int		i;
@@ -426,12 +431,43 @@ CHANNEL MIXING
 static void SND_PaintChannelFrom8 (channel_t *ch, sfxcache_t *sc, int endtime, int paintbufferstart);
 static void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int endtime, int paintbufferstart);
 
+static double sigmoid(double x) {
+    double y = tanh (x);
+    double dampen = snd_sigmoid_dampen.value;
+    
+    if (dampen > 0.) {
+        double a = 1. - CLAMP(0., dampen, 1.) / 2.;
+        double mix = exp(-abs(x));
+        y = y * mix + tanh(a*x) * (1. - mix);
+    }
+
+    return y;
+}
+
+static int Limit_Clamp(int in_sample) {
+    return CLAMP(S24_MIN, in_sample, S24_MAX);
+}
+
+static int Limit_Sigmoid(int in_sample) {
+    double sample_d = (in_sample + 0.5) / (S24_MAX + 0.5);
+    return (int)floor(sigmoid(sample_d) * (S24_MAX + 0.5) - 0.5);
+}
+
 void S_PaintChannels (int endtime)
 {
 	int		i;
 	int		end, ltime, count;
 	channel_t	*ch;
 	sfxcache_t	*sc;
+    limiter_t limit;
+   
+    switch ((int)snd_limiter.value) {
+        case 1:
+           limit = Limit_Sigmoid;
+           break;
+        default:
+           limit = Limit_Clamp;
+    }
 
 	snd_vol = sfxvolume.value * 256;
 
@@ -500,8 +536,8 @@ void S_PaintChannels (int endtime)
 	// clipping
 		for (i=0; i<end-paintedtime; i++)
 		{
-			paintbuffer[i].left = CLAMP(-32768 * 256, paintbuffer[i].left, 32767 * 256) / 2;
-			paintbuffer[i].right = CLAMP(-32768 * 256, paintbuffer[i].right, 32767 * 256) / 2;
+			paintbuffer[i].left = limit(paintbuffer[i].left) / 2;
+			paintbuffer[i].right = limit(paintbuffer[i].right) / 2;
 		}
 
 	// apply a lowpass filter
